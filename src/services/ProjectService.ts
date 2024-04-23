@@ -1,4 +1,3 @@
-// services/ProjectService.ts
 import { Project } from "../models/Project";
 
 export class ProjectService {
@@ -16,6 +15,9 @@ export class ProjectService {
 
     static addProject(project: Project): void {
         const projects = this.getProjects();
+        if (projects.some(p => p.id === project.id)) {
+            throw new Error(`Projekt z ID ${project.id} już istnieje.`);
+        }
         projects.push(project);
         localStorage.setItem(this.localStorageKey, JSON.stringify(projects));
     }
