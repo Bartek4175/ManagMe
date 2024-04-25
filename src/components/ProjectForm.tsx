@@ -3,6 +3,10 @@ import { ProjectService } from '../services/ProjectService';
 import { Project } from '../models/Project';
 import { useParams } from 'react-router-dom';
 
+const generateId = (): string => {
+    return Math.random().toString(36).substr(2, 9);
+};
+
 const ProjectForm: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [project, setProject] = useState<Project>({ id: '', name: '', description: '' });
@@ -25,10 +29,11 @@ const ProjectForm: React.FC = () => {
                 ProjectService.updateProject(project);
                 alert('Projekt zaktualizowany pomyślnie!');
             } else {
-                ProjectService.addProject(project);
+                const newProject = { ...project, id: generateId() };
+                ProjectService.addProject(newProject);
                 alert('Projekt dodany pomyślnie!');
+                setProject({ id: '', name: '', description: '' });
             }
-            setProject({ id: '', name: '', description: '' });
         } catch (err: unknown) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -41,14 +46,6 @@ const ProjectForm: React.FC = () => {
     return (
         <form onSubmit={handleSubmit}>
             {error && <p style={{ color: 'red' }}>{error}</p>}
-            <input
-                type="text"
-                value={project.id}
-                onChange={e => setProject({ ...project, id: e.target.value })}
-                placeholder="ID projektu"
-                required
-                disabled={!!id}
-            />
             <input
                 type="text"
                 value={project.name}

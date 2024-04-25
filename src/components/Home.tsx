@@ -7,6 +7,8 @@ const Home: React.FC = () => {
             <h1>Witaj w ManagMe!</h1>
             <p><Link to="/projects">Zobacz Projekty</Link></p>
             <p><Link to="/add-project">Dodaj Nowy Projekt</Link></p>
+            <p><Link to="/stories">Zobacz Historyjki</Link></p>
+            <p><Link to="/add-story">Dodaj Nową Historyjkę</Link></p>
         </div>
     );
 };
