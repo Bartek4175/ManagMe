@@ -5,6 +5,9 @@ import ProjectForm from './components/ProjectForm';
 import ProjectList from './components/ProjectList';
 import StoryList from './components/StoryList';
 import StoryForm from './components/StoryForm';
+import TaskForm from './components/TaskForm';
+import TaskDetails from './components/TaskDetails';
+import KanbanBoard from './components/KanbanBoard';
 
 const App: React.FC = () => {
     return (
@@ -17,6 +20,10 @@ const App: React.FC = () => {
                 <Route path="/stories" element={<StoryList />} />
                 <Route path="/add-story" element={<StoryForm />} />
                 <Route path="/edit-story/:id" element={<StoryForm />} />
+                <Route path="/tasks/:storyId" element={<KanbanBoard />} />
+                <Route path="/add-task/:storyId" element={<TaskForm />} />
+                <Route path="/edit-task/:storyId/:taskId" element={<TaskForm />} />
+                <Route path="/task/:id" element={<TaskDetails />} />
             </Routes>
         </Router>
     );

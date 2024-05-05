@@ -11,9 +11,11 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -39,4 +41,184 @@
 
 .read-the-docs {
   color: #888;
+}
+
+.kanban-board {
+  display: flex;
+  gap: 20px;
+}
+
+.kanban-column {
+  flex: 1;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.kanban-card {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.story-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.story-actions button, .story-actions a {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  text-decoration: none;
+  text-align: center;
+}
+
+.story-actions button:hover, .story-actions a:hover {
+  background-color: #0056b3;
+}
+
+/* Form Styles */
+form {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+}
+
+form input[type="text"],
+form input[type="number"],
+form textarea,
+form select {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+form button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+form button:hover {
+  background-color: #0056b3;
+}
+
+/* Project List Styles */
+.project-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.project-card {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.project-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.project-actions button, .project-actions a {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  text-decoration: none;
+  text-align: center;
+}
+
+.project-actions button:hover, .project-actions a:hover {
+  background-color: #0056b3;
+}
+
+/* Task Details Styles */
+.task-details {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+}
+
+.task-details p {
+  margin: 10px 0;
+}
+
+.task-details select, .task-details button {
+  margin: 10px 0;
+}
+
+/* Home Page Styles */
+.home-container {
+  text-align: left;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.home-container h1 {
+  font-size: 2.5em;
+  margin-bottom: 1em;
+}
+
+.home-container .project-info {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.home-container .links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.home-container .links a {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px;
+  border-radius: 5px;
+  text-decoration: none;
+  text-align: center;
+}
+
+.home-container .links a:hover {
+  background-color: #0056b3;
+}
+
+/* Kanban Board Button Styles */
+.kanban-card button, .kanban-card a {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  text-decoration: none;
+  text-align: center;
+  margin-top: 5px;
+}
+
+.kanban-card button:hover, .kanban-card a:hover {
+  background-color: #0056b3;
 }

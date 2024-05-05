@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { StoryService } from '../services/StoryService';
 import { Story } from '../models/Story';
-import { CurrentProjectService } from '../services/CurrentProjectService';
 import { Link } from 'react-router-dom';
+import { CurrentProjectService } from '../services/CurrentProjectService';
 
 const StoryList: React.FC = () => {
     const [stories, setStories] = useState<Story[]>([]);
@@ -23,19 +23,27 @@ const StoryList: React.FC = () => {
 
     return (
         <div>
-            <h2>Lista Historyjek dla Projektu: {currentProject?.name}</h2>
-            {['todo', 'doing', 'done'].map(status => (
-                <div key={status}>
-                    <h3>{status.toUpperCase()}</h3>
-                    {stories.filter(story => story.status === status).map(story => (
-                        <div key={story.id}>
-                            <p>ID: {story.id}, Nazwa: {story.name}, Opis: {story.description}, Priorytet: {story.priority}</p>
-                            <button onClick={() => deleteStory(story.id)}>Usuń</button>
-                            <Link to={`/edit-story/${story.id}`}><button>Edytuj</button></Link>
-                        </div>
-                    ))}
-                </div>
-            ))}
+            <h2>Lista Historyjek</h2>
+            <div className="kanban-board">
+                {['todo', 'doing', 'done'].map(status => (
+                    <div key={status} className="kanban-column">
+                        <h3>{status.toUpperCase()}</h3>
+                        {stories.filter(story => story.status === status).map(story => (
+                            <div key={story.id} className="kanban-card">
+                                <p><strong>ID:</strong> {story.id}</p>
+                                <p><strong>Nazwa:</strong> {story.name}</p>
+                                <p><strong>Opis:</strong> {story.description}</p>
+                                <div className="story-actions">
+                                    <button onClick={() => deleteStory(story.id)}>Usuń</button>
+                                    <Link to={`/edit-story/${story.id}`}>Edytuj</Link>
+                                    <Link to={`/add-task/${story.id}`}>Dodaj Zadanie</Link>
+                                    <Link to={`/tasks/${story.id}`}>Zobacz Zadania</Link>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };

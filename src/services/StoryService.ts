@@ -35,7 +35,7 @@ export class StoryService {
         localStorage.setItem(this.localStorageKey, JSON.stringify(filteredStories));
     }
 
-    private static getStories(): Story[] {
+    static getStories(): Story[] { 
         const storedStories = localStorage.getItem(this.localStorageKey);
         return storedStories ? JSON.parse(storedStories) : [];
     }
