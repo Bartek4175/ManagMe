@@ -1,38 +1,49 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { TaskService } from '../services/TaskService';
 import { Task } from '../models/Task';
-import { useParams } from 'react-router-dom';
+import { CurrentProjectService } from '../services/CurrentProjectService';
 
 const generateId = (): string => {
     return Math.random().toString(36).substr(2, 9);
 };
 
 const TaskForm: React.FC = () => {
-    const { storyId, taskId } = useParams<{ storyId: string; taskId: string }>();
+    const { storyId, taskId } = useParams<{ storyId: string, taskId?: string }>();
+    const currentProject = CurrentProjectService.getCurrentProject();
+    const navigate = useNavigate();
     const [task, setTask] = useState<Task>({
         id: '',
         name: '',
         description: '',
         priority: 'low',
         storyId: storyId || '',
+        projectId: currentProject ? currentProject.id : '',
         estimatedTime: 0,
         status: 'todo',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        startDate: '',
+        endDate: '',
+        userId: ''
     });
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        if (!currentProject || !storyId) {
+            navigate('/projects');
+            return;
+        }
         if (taskId) {
             const existingTask = TaskService.getTaskById(taskId);
             if (existingTask) {
                 setTask(existingTask);
             }
         }
-    }, [taskId]);
+    }, [taskId, storyId, currentProject, navigate]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setError(null);
+        setError(null); 
         try {
             if (taskId) {
                 TaskService.updateTask(task);
@@ -47,11 +58,16 @@ const TaskForm: React.FC = () => {
                     description: '',
                     priority: 'low',
                     storyId: storyId || '',
+                    projectId: currentProject ? currentProject.id : '',
                     estimatedTime: 0,
                     status: 'todo',
-                    createdAt: new Date().toISOString()
+                    createdAt: new Date().toISOString(),
+                    startDate: '',
+                    endDate: '',
+                    userId: ''
                 });
             }
+            navigate(`/tasks/${storyId}`);
         } catch (err: unknown) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -88,10 +104,18 @@ const TaskForm: React.FC = () => {
             <input
                 type="number"
                 value={task.estimatedTime}
-                onChange={e => setTask({ ...task, estimatedTime: parseInt(e.target.value, 10) })}
-                placeholder="Przewidywany czas wykonania (godziny)"
+                onChange={e => setTask({ ...task, estimatedTime: parseInt(e.target.value) })}
+                placeholder="Szacowany czas wykonania"
                 required
             />
+            <select
+                value={task.status}
+                onChange={e => setTask({ ...task, status: e.target.value as 'todo' | 'doing' | 'done' })}
+            >
+                <option value="todo">Do zrobienia</option>
+                <option value="doing">W trakcie</option>
+                <option value="done">Zakończone</option>
+            </select>
             <button type="submit">{taskId ? 'Zaktualizuj Zadanie' : 'Dodaj Zadanie'}</button>
         </form>
     );

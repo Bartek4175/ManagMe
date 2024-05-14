@@ -1,25 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { StoryService } from '../services/StoryService';
 import { Story } from '../models/Story';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { CurrentProjectService } from '../services/CurrentProjectService';
 
 const StoryList: React.FC = () => {
     const [stories, setStories] = useState<Story[]>([]);
     const currentProject = CurrentProjectService.getCurrentProject();
+    const navigate = useNavigate();
 
     useEffect(() => {
-        if (currentProject) {
-            setStories(StoryService.getStoriesByProject(currentProject.id));
+        if (!currentProject) {
+            navigate('/projects');
+            return;
         }
-    }, [currentProject]);
+
+        const fetchedStories = StoryService.getStoriesByProject(currentProject.id);
+        if (JSON.stringify(stories) !== JSON.stringify(fetchedStories)) {
+            setStories(fetchedStories);
+        }
+
+    }, [currentProject, navigate]);
 
     const deleteStory = (id: string) => {
         StoryService.deleteStory(id);
         if (currentProject) {
-            setStories(StoryService.getStoriesByProject(currentProject.id));
+            const updatedStories = StoryService.getStoriesByProject(currentProject.id);
+            setStories(updatedStories);
         }
     };
+
+    if (!currentProject) {
+        return <p>Nie wybrano projektu. Przekierowanie...</p>;
+    }
 
     return (
         <div>

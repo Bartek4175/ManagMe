@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { StoryService } from '../services/StoryService';
 import { Story } from '../models/Story';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { CurrentProjectService } from '../services/CurrentProjectService';
-import { UserService } from '../services/UserService';
+import { useAuth } from '../contexts/AuthContext';
 
 const generateId = (): string => {
     return Math.random().toString(36).substr(2, 9);
@@ -12,7 +12,8 @@ const generateId = (): string => {
 const StoryForm: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const currentProject = CurrentProjectService.getCurrentProject();
-    const currentUser = UserService.getCurrentUser();
+    const { user } = useAuth();
+    const navigate = useNavigate();
     const [story, setStory] = useState<Story>({
         id: '',
         name: '',
@@ -21,28 +22,36 @@ const StoryForm: React.FC = () => {
         projectId: currentProject ? currentProject.id : '',
         createdAt: new Date().toISOString(),
         status: 'todo',
-        ownerId: currentUser.id
+        ownerId: user ? user.id : ''
     });
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        if (!user || !currentProject) {
+            navigate('/projects');
+            return;
+        }
         if (id) {
             const existingStory = StoryService.getStoryById(id);
             if (existingStory) {
                 setStory(existingStory);
             }
         }
-    }, [id]);
+    }, [id, user, currentProject, navigate]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setError(null); 
+        setError(null);
+        if (!user) {
+            setError('Użytkownik niezalogowany.');
+            return;
+        }
         try {
             if (id) {
-                StoryService.updateStory(story);
+                StoryService.updateStory({ ...story, ownerId: user.id });
                 alert('Historyjka zaktualizowana pomyślnie!');
             } else {
-                const newStory = { ...story, id: generateId() };
+                const newStory = { ...story, id: generateId(), ownerId: user.id };
                 StoryService.addStory(newStory);
                 alert('Historyjka dodana pomyślnie!');
                 setStory({
@@ -53,7 +62,7 @@ const StoryForm: React.FC = () => {
                     projectId: currentProject ? currentProject.id : '',
                     createdAt: new Date().toISOString(),
                     status: 'todo',
-                    ownerId: currentUser.id
+                    ownerId: user.id
                 });
             }
         } catch (err: unknown) {
@@ -64,6 +73,10 @@ const StoryForm: React.FC = () => {
             }
         }
     };
+
+    if (!currentProject) {
+        return <p>Nie wybrano projektu. Przekierowanie...</p>;
+    }
 
     return (
         <form onSubmit={handleSubmit}>
