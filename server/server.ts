@@ -2,17 +2,19 @@ import express, { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import 'dotenv/config';
 import cors from 'cors';
+import { OAuth2Client } from 'google-auth-library';
 
 const app = express();
 const port = 3000;
 
 const tokenSecret = process.env.TOKEN_SECRET as string;
+const googleClientId = process.env.GOOGLE_CLIENT_ID as string;
+const client = new OAuth2Client(googleClientId);
 let refreshToken: string;
 
 app.use(cors());
 app.use(express.json());
 
-// Mock users
 const users: { id: number, login: string, password: string, firstName: string, lastName: string, role: string }[] = [
   { id: 1, login: 'admin', password: 'password', firstName: 'Maciej', lastName: 'Kowalski', role: 'admin' },
   { id: 2, login: 'devops', password: 'password', firstName: 'Andrzej', lastName: 'Tomaszewski', role: 'devops' },
@@ -28,7 +30,7 @@ app.post('/register', (req: Request, res: Response) => {
   if (users.find(user => user.login === login)) {
     return res.status(400).send('User already exists');
   }
-  const newUser = { id: users.length + 1, login, password, firstName, lastName, role: role || 'developer' };
+  const newUser = { id: users.length + 1, login, password, firstName, lastName, role: role || 'developer' }; 
   users.push(newUser);
   res.status(201).send('User registered');
 });
@@ -44,7 +46,41 @@ app.post('/login', (req: Request, res: Response) => {
   const token = generateToken({ id: user.id.toString(), role: user.role, firstName: user.firstName, lastName: user.lastName }, 60 * 15); // 15 minutes
   refreshToken = generateToken({ id: user.id.toString(), role: user.role, firstName: user.firstName, lastName: user.lastName }, 60 * 60 * 24); // 24 hours
 
-  res.status(200).send({ token, refreshToken });
+  res.status(200).send({ token, refreshToken, user });
+});
+
+app.post('/google-login', async (req: Request, res: Response) => {
+  const { token: googleToken } = req.body;
+
+  const ticket = await client.verifyIdToken({
+    idToken: googleToken,
+    audience: googleClientId,
+  });
+
+  const payload = ticket.getPayload();
+
+  if (!payload) {
+    return res.status(400).send('Invalid Google token');
+  }
+
+  let user = users.find(u => u.login === payload.email);
+
+  if (!user) {
+    user = {
+      id: users.length + 1,
+      login: payload.email || '',
+      password: '',
+      firstName: payload.given_name || '',
+      lastName: payload.family_name || '',
+      role: 'developer'
+    };
+    users.push(user);
+  }
+
+  const jwtToken = generateToken({ id: user.id.toString(), role: user.role, firstName: user.firstName, lastName: user.lastName }, 60 * 15); // 15 minutes
+  const newRefreshToken = generateToken({ id: user.id.toString(), role: user.role, firstName: user.firstName, lastName: user.lastName }, 60 * 60 * 24); // 24 hours
+
+  res.status(200).send({ token: jwtToken, refreshToken: newRefreshToken, user });
 });
 
 app.get('/users', (req: Request, res: Response) => {
@@ -60,7 +96,7 @@ app.get('/users/:id', (req: Request, res: Response) => {
   res.status(200).json(user);
 });
 
-app.post('/refreshToken', (req: Request, res: Response) => {
+app.post('/refreshToken', verifyToken, (req: Request, res: Response) => {
   const { refreshToken: refreshTokenFromPost } = req.body;
 
   if (refreshToken !== refreshTokenFromPost) {
@@ -71,10 +107,10 @@ app.post('/refreshToken', (req: Request, res: Response) => {
     return res.status(401).send('Unauthorized');
   }
 
-  const token = generateToken({ id: req.user.id, role: req.user.role, firstName: req.user.firstName, lastName: req.user.lastName }, 60 * 15); // 15 minutes
+  const jwtToken = generateToken({ id: req.user.id, role: req.user.role, firstName: req.user.firstName, lastName: req.user.lastName }, 60 * 15); // 15 minutes
   refreshToken = generateToken({ id: req.user.id, role: req.user.role, firstName: req.user.firstName, lastName: req.user.lastName }, 60 * 60 * 24); // 24 hours
 
-  res.status(200).send({ token, refreshToken });
+  res.status(200).send({ token: jwtToken, refreshToken });
 });
 
 app.get('/protected/:id/:delay?', verifyToken, (req: Request, res: Response) => {
