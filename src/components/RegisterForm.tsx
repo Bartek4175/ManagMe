@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Form, Button, Alert, Container, Row, Col } from 'react-bootstrap';
 
 const RegisterForm: React.FC = () => {
   const [login, setLogin] = useState('');
@@ -23,7 +24,7 @@ const RegisterForm: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Rejestracja nie powiodła się');
+        throw new Error('Registration failed');
       }
 
       navigate('/login');
@@ -33,44 +34,71 @@ const RegisterForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Rejestracja</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <input
-        type="text"
-        value={login}
-        onChange={e => setLogin(e.target.value)}
-        placeholder="Login"
-        required
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        placeholder="Hasło"
-        required
-      />
-      <input
-        type="text"
-        value={firstName}
-        onChange={e => setFirstName(e.target.value)}
-        placeholder="Imię"
-        required
-      />
-      <input
-        type="text"
-        value={lastName}
-        onChange={e => setLastName(e.target.value)}
-        placeholder="Nazwisko"
-        required
-      />
-      <select value={role} onChange={e => setRole(e.target.value as 'admin' | 'devops' | 'developer')}>
-        <option value="developer">Developer</option>
-        <option value="devops">DevOps</option>
-        <option value="admin">Admin</option>
-      </select>
-      <button type="submit">Zarejestruj się</button>
-    </form>
+    <Container>
+      <Row className="justify-content-md-center">
+        <Col md="6">
+          <h2 className="text-center">Register</h2>
+          {error && <Alert variant="danger">{error}</Alert>}
+          <Form onSubmit={handleSubmit}>
+            <Form.Group controlId="formLogin">
+              <Form.Label>Login</Form.Label>
+              <Form.Control
+                type="text"
+                value={login}
+                onChange={e => setLogin(e.target.value)}
+                placeholder="Enter login"
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formPassword" className="mt-3">
+              <Form.Label>Password</Form.Label>
+              <Form.Control
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="Enter password"
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formFirstName" className="mt-3">
+              <Form.Label>First Name</Form.Label>
+              <Form.Control
+                type="text"
+                value={firstName}
+                onChange={e => setFirstName(e.target.value)}
+                placeholder="Enter first name"
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formLastName" className="mt-3">
+              <Form.Label>Last Name</Form.Label>
+              <Form.Control
+                type="text"
+                value={lastName}
+                onChange={e => setLastName(e.target.value)}
+                placeholder="Enter last name"
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formRole" className="mt-3">
+              <Form.Label>Role</Form.Label>
+              <Form.Control
+                as="select"
+                value={role}
+                onChange={e => setRole(e.target.value as 'admin' | 'devops' | 'developer')}
+              >
+                <option value="developer">Developer</option>
+                <option value="devops">DevOps</option>
+                <option value="admin">Admin</option>
+              </Form.Control>
+            </Form.Group>
+            <Button variant="primary" type="submit" className="mt-3">
+              Register
+            </Button>
+          </Form>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 

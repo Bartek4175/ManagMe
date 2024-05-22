@@ -3,6 +3,7 @@ import { ProjectService } from '../services/ProjectService';
 import { Project } from '../models/Project';
 import { Link } from 'react-router-dom';
 import { CurrentProjectService } from '../services/CurrentProjectService';
+import { Card, Button, Container } from 'react-bootstrap';
 
 const ProjectList: React.FC = () => {
     const [projects, setProjects] = useState<Project[]>([]);
@@ -22,21 +23,25 @@ const ProjectList: React.FC = () => {
     };
 
     return (
-        <div className="project-list">
+        <Container className="mt-4">
             <h2>Lista Projektów</h2>
             {projects.map(project => (
-                <div key={project.id} className="project-card">
-                    <p><strong>ID:</strong> {project.id}</p>
-                    <p><strong>Nazwa:</strong> {project.name}</p>
-                    <p><strong>Opis:</strong> {project.description}</p>
-                    <div className="project-actions">
-                        <button onClick={() => selectProject(project)}>Wybierz</button>
-                        <button onClick={() => deleteProject(project.id)}>Usuń</button>
-                        <Link to={`/edit-project/${project.id}`}>Edytuj</Link>
-                    </div>
-                </div>
+                <Card key={project.id} className="mb-3">
+                    <Card.Body>
+                        <Card.Title>{project.name}</Card.Title>
+                        <Card.Text>
+                            <strong>ID:</strong> {project.id}<br />
+                            <strong>Opis:</strong> {project.description}
+                        </Card.Text>
+                        <div className="d-flex justify-content-between">
+                            <Button variant="primary" onClick={() => selectProject(project)}>Wybierz</Button>
+                            <Button variant="danger" onClick={() => deleteProject(project.id)}>Usuń</Button>
+                            <Link to={`/edit-project/${project.id}`} className="btn btn-secondary">Edytuj</Link>
+                        </div>
+                    </Card.Body>
+                </Card>
             ))}
-        </div>
+        </Container>
     );
 };
 

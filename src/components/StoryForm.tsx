@@ -4,6 +4,7 @@ import { Story } from '../models/Story';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CurrentProjectService } from '../services/CurrentProjectService';
 import { useAuth } from '../contexts/AuthContext';
+import { Form, Button, Container } from 'react-bootstrap';
 
 const generateId = (): string => {
     return Math.random().toString(36).substr(2, 9);
@@ -79,39 +80,59 @@ const StoryForm: React.FC = () => {
     }
 
     return (
-        <form onSubmit={handleSubmit}>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            <input
-                type="text"
-                value={story.name}
-                onChange={e => setStory({ ...story, name: e.target.value })}
-                placeholder="Nazwa historyjki"
-                required
-            />
-            <textarea
-                value={story.description}
-                onChange={e => setStory({ ...story, description: e.target.value })}
-                placeholder="Opis historyjki"
-                required
-            />
-            <select
-                value={story.priority}
-                onChange={e => setStory({ ...story, priority: e.target.value as 'low' | 'medium' | 'high' })}
-            >
-                <option value="low">Niski</option>
-                <option value="medium">Średni</option>
-                <option value="high">Wysoki</option>
-            </select>
-            <select
-                value={story.status}
-                onChange={e => setStory({ ...story, status: e.target.value as 'todo' | 'doing' | 'done' })}
-            >
-                <option value="todo">Do zrobienia</option>
-                <option value="doing">W trakcie</option>
-                <option value="done">Zakończone</option>
-            </select>
-            <button type="submit">{id ? 'Zaktualizuj Historyjkę' : 'Dodaj Historyjkę'}</button>
-        </form>
+        <Container className="mt-4">
+            <h2>{id ? 'Zaktualizuj Historyjkę' : 'Dodaj Historyjkę'}</h2>
+            <Form onSubmit={handleSubmit}>
+                {error && <p className="text-danger">{error}</p>}
+                <Form.Group className="mb-3">
+                    <Form.Label>Nazwa historyjki</Form.Label>
+                    <Form.Control
+                        type="text"
+                        value={story.name}
+                        onChange={e => setStory({ ...story, name: e.target.value })}
+                        placeholder="Nazwa historyjki"
+                        required
+                    />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Label>Opis historyjki</Form.Label>
+                    <Form.Control
+                        as="textarea"
+                        value={story.description}
+                        onChange={e => setStory({ ...story, description: e.target.value })}
+                        placeholder="Opis historyjki"
+                        required
+                    />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Label>Priorytet</Form.Label>
+                    <Form.Control
+                        as="select"
+                        value={story.priority}
+                        onChange={e => setStory({ ...story, priority: e.target.value as 'low' | 'medium' | 'high' })}
+                    >
+                        <option value="low">Niski</option>
+                        <option value="medium">Średni</option>
+                        <option value="high">Wysoki</option>
+                    </Form.Control>
+                </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Label>Status</Form.Label>
+                    <Form.Control
+                        as="select"
+                        value={story.status}
+                        onChange={e => setStory({ ...story, status: e.target.value as 'todo' | 'doing' | 'done' })}
+                    >
+                        <option value="todo">Do zrobienia</option>
+                        <option value="doing">W trakcie</option>
+                        <option value="done">Zakończone</option>
+                    </Form.Control>
+                </Form.Group>
+                <Button type="submit" variant="primary">
+                    {id ? 'Zaktualizuj Historyjkę' : 'Dodaj Historyjkę'}
+                </Button>
+            </Form>
+        </Container>
     );
 };
 

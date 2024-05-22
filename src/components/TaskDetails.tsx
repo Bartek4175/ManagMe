@@ -3,6 +3,7 @@ import { TaskService } from '../services/TaskService';
 import { Task } from '../models/Task';
 import { User } from '../models/User';
 import { useParams } from 'react-router-dom';
+import { Card, Container, Row, Col, Button, Spinner } from 'react-bootstrap';
 
 const TaskDetails: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -38,7 +39,7 @@ const TaskDetails: React.FC = () => {
         }
     }, [assignee]);
 
-    const handleAssigneeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const handleAssigneeChange: React.ChangeEventHandler<HTMLSelectElement> = (e) => {
         const userId = e.target.value;
         setAssignee(userId);
         if (task) {
@@ -56,34 +57,73 @@ const TaskDetails: React.FC = () => {
         }
     };
 
-    if (!task) return <p>Loading...</p>;
+    if (!task) return <Spinner animation="border" />;
 
     return (
-        <div className="task-details">
-            <h2>Szczegóły Zadania</h2>
-            <p><strong>Nazwa:</strong> {task.name}</p>
-            <p><strong>Opis:</strong> {task.description}</p>
-            <p><strong>Priorytet:</strong> {task.priority}</p>
-            <p><strong>Data dodania:</strong> {task.createdAt}</p>
-            <p><strong>Przewidywany czas wykonania:</strong> {task.estimatedTime} godzin</p>
-            <p><strong>Status:</strong> {task.status}</p>
-            <p><strong>Data startu:</strong> {task.startDate}</p>
-            <p><strong>Data zakończenia:</strong> {task.endDate}</p>
-            <p><strong>Przypisana osoba:</strong> {assignedUser ? `${assignedUser.firstName} ${assignedUser.lastName} (${assignedUser.role})` : 'Brak'}</p>
-            {task.status === 'todo' && (
-                <div>
-                    <select value={assignee} onChange={handleAssigneeChange}>
-                        <option value="">Wybierz osobę</option>
-                        {users.map(user => (
-                            <option key={user.id} value={user.id}>{user.firstName} {user.lastName} ({user.role})</option>
-                        ))}
-                    </select>
-                </div>
-            )}
-            {task.status === 'doing' && (
-                <button onClick={markAsDone}>Zakończ zadanie</button>
-            )}
-        </div>
+        <Container className="mt-4">
+            <Card>
+                <Card.Header>
+                    <h2>Szczegóły Zadania</h2>
+                </Card.Header>
+                <Card.Body>
+                    <Row className="mb-3">
+                        <Col><strong>Nazwa:</strong></Col>
+                        <Col>{task.name}</Col>
+                    </Row>
+                    <Row className="mb-3">
+                        <Col><strong>Opis:</strong></Col>
+                        <Col>{task.description}</Col>
+                    </Row>
+                    <Row className="mb-3">
+                        <Col><strong>Priorytet:</strong></Col>
+                        <Col>{task.priority}</Col>
+                    </Row>
+                    <Row className="mb-3">
+                        <Col><strong>Data dodania:</strong></Col>
+                        <Col>{task.createdAt}</Col>
+                    </Row>
+                    <Row className="mb-3">
+                        <Col><strong>Przewidywany czas wykonania:</strong></Col>
+                        <Col>{task.estimatedTime} godzin</Col>
+                    </Row>
+                    <Row className="mb-3">
+                        <Col><strong>Status:</strong></Col>
+                        <Col>{task.status}</Col>
+                    </Row>
+                    <Row className="mb-3">
+                        <Col><strong>Data startu:</strong></Col>
+                        <Col>{task.startDate}</Col>
+                    </Row>
+                    <Row className="mb-3">
+                        <Col><strong>Data zakończenia:</strong></Col>
+                        <Col>{task.endDate}</Col>
+                    </Row>
+                    <Row className="mb-3">
+                        <Col><strong>Przypisana osoba:</strong></Col>
+                        <Col>{assignedUser ? `${assignedUser.firstName} ${assignedUser.lastName} (${assignedUser.role})` : 'Brak'}</Col>
+                    </Row>
+                    {task.status === 'todo' && (
+                        <div>
+                            <label htmlFor="assigneeSelect">Przypisz do</label>
+                            <select
+                                id="assigneeSelect"
+                                className="form-control"
+                                value={assignee}
+                                onChange={handleAssigneeChange}
+                            >
+                                <option value="">Wybierz osobę</option>
+                                {users.map(user => (
+                                    <option key={user.id} value={user.id}>{user.firstName} {user.lastName} ({user.role})</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+                    {task.status === 'doing' && (
+                        <Button variant="success" onClick={markAsDone}>Zakończ zadanie</Button>
+                    )}
+                </Card.Body>
+            </Card>
+        </Container>
     );
 };
 

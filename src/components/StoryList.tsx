@@ -3,6 +3,7 @@ import { StoryService } from '../services/StoryService';
 import { Story } from '../models/Story';
 import { Link, useNavigate } from 'react-router-dom';
 import { CurrentProjectService } from '../services/CurrentProjectService';
+import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 
 const StoryList: React.FC = () => {
     const [stories, setStories] = useState<Story[]>([]);
@@ -20,7 +21,7 @@ const StoryList: React.FC = () => {
             setStories(fetchedStories);
         }
 
-    }, [currentProject, navigate]);
+    }, [currentProject, navigate, stories]);
 
     const deleteStory = (id: string) => {
         StoryService.deleteStory(id);
@@ -35,29 +36,37 @@ const StoryList: React.FC = () => {
     }
 
     return (
-        <div>
-            <h2>Lista Historyjek</h2>
-            <div className="kanban-board">
+        <Container className="mt-4">
+            <h2 className="mb-4">Lista Historyjek</h2>
+            <Row className="kanban-board">
                 {['todo', 'doing', 'done'].map(status => (
-                    <div key={status} className="kanban-column">
-                        <h3>{status.toUpperCase()}</h3>
+                    <Col key={status} className="kanban-column">
+                        <h3 className="text-center">{status.toUpperCase()}</h3>
                         {stories.filter(story => story.status === status).map(story => (
-                            <div key={story.id} className="kanban-card">
-                                <p><strong>ID:</strong> {story.id}</p>
-                                <p><strong>Nazwa:</strong> {story.name}</p>
-                                <p><strong>Opis:</strong> {story.description}</p>
-                                <div className="story-actions">
-                                    <button onClick={() => deleteStory(story.id)}>Usuń</button>
-                                    <Link to={`/edit-story/${story.id}`}>Edytuj</Link>
-                                    <Link to={`/add-task/${story.id}`}>Dodaj Zadanie</Link>
-                                    <Link to={`/tasks/${story.id}`}>Zobacz Zadania</Link>
-                                </div>
-                            </div>
+                            <Card key={story.id} className="kanban-card mb-3">
+                                <Card.Body>
+                                    <Card.Title>ID: {story.id}</Card.Title>
+                                    <Card.Subtitle className="mb-2 text-muted">Nazwa: {story.name}</Card.Subtitle>
+                                    <Card.Text>Opis: {story.description}</Card.Text>
+                                    <div className="story-actions">
+                                        <Button variant="danger" onClick={() => deleteStory(story.id)} className="me-2">Usuń</Button>
+                                        <Button variant="primary" className="me-2">
+                                            <Link to={`/edit-story/${story.id}`} className="text-white text-decoration-none">Edytuj</Link>
+                                        </Button>
+                                        <Button variant="secondary" className="me-2">
+                                            <Link to={`/add-task/${story.id}`} className="text-white text-decoration-none">Dodaj Zadanie</Link>
+                                        </Button>
+                                        <Button variant="info">
+                                            <Link to={`/tasks/${story.id}`} className="text-white text-decoration-none">Zobacz Zadania</Link>
+                                        </Button>
+                                    </div>
+                                </Card.Body>
+                            </Card>
                         ))}
-                    </div>
+                    </Col>
                 ))}
-            </div>
-        </div>
+            </Row>
+        </Container>
     );
 };
 

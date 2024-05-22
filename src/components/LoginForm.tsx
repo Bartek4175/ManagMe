@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Form, Button, Container, Alert } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import GoogleLoginButton from './GoogleLoginButton';
 
@@ -41,27 +42,35 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <Container className="mt-4">
       <h2>Login</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <input
-        type="text"
-        value={login}
-        onChange={e => setLogin(e.target.value)}
-        placeholder="Login"
-        required
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        placeholder="Password"
-        required
-      />
-      <button type="submit">Login</button>
+      {error && <Alert variant="danger">{error}</Alert>}
+      <Form onSubmit={handleSubmit}>
+        <Form.Group controlId="formLogin">
+          <Form.Label>Login</Form.Label>
+          <Form.Control
+            type="text"
+            value={login}
+            onChange={e => setLogin(e.target.value)}
+            placeholder="Login"
+            required
+          />
+        </Form.Group>
+        <Form.Group controlId="formPassword">
+          <Form.Label>Password</Form.Label>
+          <Form.Control
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder="Password"
+            required
+          />
+        </Form.Group>
+        <Button variant="primary" type="submit" className="mt-3">Login</Button>
+      </Form>
       <GoogleLoginButton />
-      <p>Nie masz konta? <Link to="/register">Zarejestruj się</Link></p>
-    </form>
+      <p className="mt-3">Nie masz konta? <Link to="/register">Zarejestruj się</Link></p>
+    </Container>
   );
 };
 
