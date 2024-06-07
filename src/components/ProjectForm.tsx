@@ -3,6 +3,7 @@ import { ProjectService } from '../services/ProjectService';
 import { Project } from '../models/Project';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Form, Button, Alert } from 'react-bootstrap';
+import { notificationService } from '../services/NotificationService';
 
 const generateId = (): string => {
     return Math.random().toString(36).substr(2, 9);
@@ -30,12 +31,25 @@ const ProjectForm: React.FC = () => {
             if (id) {
                 ProjectService.updateProject(project);
                 alert('Projekt zaktualizowany pomyślnie!');
-                window.dispatchEvent(new Event('projectUpdated'));
+                notificationService.send({
+                    title: 'Projekt zaktualizowany',
+                    message: `Projekt ${project.name} został zaktualizowany`,
+                    date: new Date().toISOString(),
+                    priority: 'medium',
+                    read: false
+                });
             } else {
                 const newProject = { ...project, id: generateId() };
                 ProjectService.addProject(newProject);
                 alert('Projekt dodany pomyślnie!');
                 setProject({ id: '', name: '', description: '' });
+                notificationService.send({
+                    title: 'Nowy projekt dodany',
+                    message: `Projekt ${newProject.name} został dodany`,
+                    date: new Date().toISOString(),
+                    priority: 'medium',
+                    read: false
+                });
             }
             navigate('/projects');
         } catch (err: unknown) {

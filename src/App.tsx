@@ -14,8 +14,9 @@ import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CurrentProjectService } from './services/CurrentProjectService';
-import CustomNavbar from './components/CustomNavbar';
 import { Container } from 'react-bootstrap';
+import CustomNavbar from './components/CustomNavbar';
+import NotificationList from './components/NotificationList';
 
 const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -67,6 +68,7 @@ const App: React.FC = () => {
             <Route path="/add-task/:storyId" element={<ProtectedRoute><ProjectProtectedRoute><TaskForm /></ProjectProtectedRoute></ProtectedRoute>} />
             <Route path="/edit-task/:storyId/:taskId" element={<ProtectedRoute><ProjectProtectedRoute><TaskForm /></ProjectProtectedRoute></ProtectedRoute>} />
             <Route path="/task/:id" element={<ProtectedRoute><ProjectProtectedRoute><TaskDetails /></ProjectProtectedRoute></ProtectedRoute>} />
+            <Route path="/notifications" element={<NotificationList />} />
           </Routes>
         </Container>
       </Router>
