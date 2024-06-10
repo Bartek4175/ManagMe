@@ -5,6 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { CurrentProjectService } from '../services/CurrentProjectService';
 import { useAuth } from '../contexts/AuthContext';
 import { Form, Button, Container } from 'react-bootstrap';
+import { notificationService } from '../services/NotificationService';
 
 const generateId = (): string => {
     return Math.random().toString(36).substr(2, 9);
@@ -50,11 +51,18 @@ const StoryForm: React.FC = () => {
         try {
             if (id) {
                 StoryService.updateStory({ ...story, ownerId: user.id });
-                alert('Historyjka zaktualizowana pomyślnie!');
+                alert('Story zaktualizowany pomyślnie!');
+                notificationService.send({
+                    title: 'Story zaktualizowany pomyślnie',
+                    message: `Story o ID ${id} został zaktualizowany`,
+                    date: new Date().toISOString(),
+                    priority: 'medium',
+                    read: false
+                });
             } else {
                 const newStory = { ...story, id: generateId(), ownerId: user.id };
                 StoryService.addStory(newStory);
-                alert('Historyjka dodana pomyślnie!');
+                alert('Story dodana pomyślnie!');
                 setStory({
                     id: '',
                     name: '',
@@ -64,6 +72,13 @@ const StoryForm: React.FC = () => {
                     createdAt: new Date().toISOString(),
                     status: 'todo',
                     ownerId: user.id
+                });
+                notificationService.send({
+                    title: 'Story dodana pomyślnie!',
+                    message: `Nowe story w projekcie ${currentProject?.name} zostało dodane! `,
+                    date: new Date().toISOString(),
+                    priority: 'medium',
+                    read: false
                 });
             }
         } catch (err: unknown) {
@@ -81,26 +96,26 @@ const StoryForm: React.FC = () => {
 
     return (
         <Container className="mt-4">
-            <h2>{id ? 'Zaktualizuj Historyjkę' : 'Dodaj Historyjkę'}</h2>
+            <h2>{id ? 'Zaktualizuj Story' : 'Dodaj Story'}</h2>
             <Form onSubmit={handleSubmit}>
                 {error && <p className="text-danger">{error}</p>}
                 <Form.Group className="mb-3">
-                    <Form.Label>Nazwa historyjki</Form.Label>
+                    <Form.Label>Nazwa Story</Form.Label>
                     <Form.Control
                         type="text"
                         value={story.name}
                         onChange={e => setStory({ ...story, name: e.target.value })}
-                        placeholder="Nazwa historyjki"
+                        placeholder="Nazwa Story"
                         required
                     />
                 </Form.Group>
                 <Form.Group className="mb-3">
-                    <Form.Label>Opis historyjki</Form.Label>
+                    <Form.Label>Opis Story</Form.Label>
                     <Form.Control
                         as="textarea"
                         value={story.description}
                         onChange={e => setStory({ ...story, description: e.target.value })}
-                        placeholder="Opis historyjki"
+                        placeholder="Opis Story"
                         required
                     />
                 </Form.Group>
@@ -129,7 +144,7 @@ const StoryForm: React.FC = () => {
                     </Form.Control>
                 </Form.Group>
                 <Button type="submit" variant="primary">
-                    {id ? 'Zaktualizuj Historyjkę' : 'Dodaj Historyjkę'}
+                    {id ? 'Zaktualizuj Story' : 'Dodaj Story'}
                 </Button>
             </Form>
         </Container>

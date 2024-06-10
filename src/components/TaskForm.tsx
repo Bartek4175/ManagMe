@@ -4,6 +4,7 @@ import { TaskService } from '../services/TaskService';
 import { Task } from '../models/Task';
 import { CurrentProjectService } from '../services/CurrentProjectService';
 import { Form, Button, Container } from 'react-bootstrap';
+import { notificationService } from '../services/NotificationService';
 
 const generateId = (): string => {
   return Math.random().toString(36).substr(2, 9);
@@ -49,6 +50,13 @@ const TaskForm: React.FC = () => {
       if (taskId) {
         TaskService.updateTask(task);
         alert('Zadanie zaktualizowane pomyślnie!');
+        notificationService.send({
+          title: 'Zadanie zaktualizowane pomyślnie!',
+          message: `Zadanie ${task.name} zaktualizowane pomyślnie w story ${storyId} i w projekcie ${currentProject?.name}`,
+          date: new Date().toISOString(),
+          priority: 'medium',
+          read: false
+      });
       } else {
         const newTask = { ...task, id: generateId() };
         TaskService.addTask(newTask);
@@ -57,7 +65,7 @@ const TaskForm: React.FC = () => {
           id: '',
           name: '',
           description: '',
-          priority: 'low',
+          priority: 'high',
           storyId: storyId || '',
           projectId: currentProject ? currentProject.id : '',
           estimatedTime: 0,
@@ -67,6 +75,13 @@ const TaskForm: React.FC = () => {
           endDate: '',
           userId: ''
         });
+        notificationService.send({
+          title: 'Dodano nowe zadanie!',
+          message: `Dodano nowe zadanie w Story ${storyId} i w projekcie ${currentProject?.name}`,
+          date: new Date().toISOString(),
+          priority: 'medium',
+          read: false
+      });
       }
       navigate(`/tasks/${storyId}`);
     } catch (err: unknown) {

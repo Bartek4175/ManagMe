@@ -37,7 +37,7 @@ const StoryList: React.FC = () => {
 
     return (
         <Container className="mt-4">
-            <h2 className="mb-4">Lista Historyjek</h2>
+            <h2 className="mb-4">Lista Story</h2>
             <div className="p-4 bg-white rounded shadow-sm">
                 <Row className="kanban-board">
                     {['todo', 'doing', 'done'].map(status => (

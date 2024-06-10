@@ -17,7 +17,7 @@ class NotificationService {
 
   send(notification: AppNotification) {
     this.notifications.push(notification);
-    this.notificationsSubject.next(this.notifications.slice()); // Emit a new value
+    this.notificationsSubject.next(this.notifications.slice());
     this.updateUnreadCount();
     if (notification.priority === 'medium' || notification.priority === 'high') {
       this.showNotificationDialog(notification);
@@ -38,7 +38,7 @@ class NotificationService {
   }
 
   private showNotificationDialog(notification: AppNotification) {
-    // Implementacja okna dialogowego z powiadomieniami
+    // alert z powiadomieniami - todo do jakiegos modala
     alert(`Notification: ${notification.title} - ${notification.message}`);
   }
 
@@ -46,7 +46,7 @@ class NotificationService {
     const index = this.notifications.findIndex(n => n === notification);
     if (index !== -1) {
       this.notifications[index].read = true;
-      this.notificationsSubject.next(this.notifications.slice()); // Emit a new value
+      this.notificationsSubject.next(this.notifications.slice());
       this.updateUnreadCount();
     }
   }
