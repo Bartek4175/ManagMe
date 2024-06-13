@@ -14,6 +14,12 @@ const LoginForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!password.trim()) {
+      setError('Password cannot be empty');
+      return;
+    }
+
     try {
       const response = await fetch('http://localhost:3000/login', {
         method: 'POST',

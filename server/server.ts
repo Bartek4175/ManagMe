@@ -3,6 +3,8 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import 'dotenv/config';
 import cors from 'cors';
 import { OAuth2Client } from 'google-auth-library';
+import mongoose, { ConnectOptions } from 'mongoose';
+import { User } from './models/User';
 
 const app = express();
 const port = 3000;
@@ -10,90 +12,123 @@ const port = 3000;
 const tokenSecret = process.env.TOKEN_SECRET as string;
 const googleClientId = process.env.GOOGLE_CLIENT_ID as string;
 const client = new OAuth2Client(googleClientId);
+
 let refreshToken: string;
 
 app.use(cors());
 app.use(express.json());
 
-const users: { id: number, login: string, password: string, firstName: string, lastName: string, role: string }[] = [
-  { id: 1, login: 'admin', password: 'password', firstName: 'Maciej', lastName: 'Kowalski', role: 'admin' },
-  { id: 2, login: 'devops', password: 'password', firstName: 'Andrzej', lastName: 'Tomaszewski', role: 'devops' },
-  { id: 3, login: 'developer', password: 'password', firstName: 'Bartłomiej', lastName: 'Paluch', role: 'developer' }
-];
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI as string, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+} as ConnectOptions).then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
+
+// Define a generic error type
+interface GenericError {
+  message: string;
+}
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello World - simple api with JWT!');
 });
 
-app.post('/register', (req: Request, res: Response) => {
+app.post('/register', async (req: Request, res: Response) => {
   const { login, password, firstName, lastName, role } = req.body;
-  if (users.find(user => user.login === login)) {
-    return res.status(400).send('User already exists');
+  try {
+    const existingUser = await User.findOne({ login });
+    if (existingUser) {
+      return res.status(400).send('User already exists');
+    }
+    const newUser = new User({ login, password, firstName, lastName, role });
+    await newUser.save();
+    res.status(201).send('User registered');
+  } catch (err) {
+    const error = err as GenericError;
+    res.status(500).json({ message: 'Internal server error', error: error.message });
   }
-  const newUser = { id: users.length + 1, login, password, firstName, lastName, role: role || 'developer' }; 
-  users.push(newUser);
-  res.status(201).send('User registered');
 });
 
-app.post('/login', (req: Request, res: Response) => {
+app.post('/login', async (req: Request, res: Response) => {
   const { login, password } = req.body;
 
-  const user = users.find(u => u.login === login && u.password === password);
-  if (!user) {
-    return res.status(401).send('Invalid login or password');
+  try {
+    const user = await User.findOne({ login, password });
+    if (!user) {
+      return res.status(401).send('Invalid login or password');
+    }
+
+    const token = generateToken({ id: user.id, role: user.role, firstName: user.firstName, lastName: user.lastName }, 60 * 15); // 15 minutes
+    refreshToken = generateToken({ id: user.id, role: user.role, firstName: user.firstName, lastName: user.lastName }, 60 * 60 * 24); // 24 hours
+
+    res.status(200).send({ token, refreshToken, user });
+  } catch (err) {
+    const error = err as GenericError;
+    res.status(500).json({ message: 'Internal server error', error: error.message });
   }
-
-  const token = generateToken({ id: user.id.toString(), role: user.role, firstName: user.firstName, lastName: user.lastName }, 60 * 15); // 15 minutes
-  refreshToken = generateToken({ id: user.id.toString(), role: user.role, firstName: user.firstName, lastName: user.lastName }, 60 * 60 * 24); // 24 hours
-
-  res.status(200).send({ token, refreshToken, user });
 });
 
 app.post('/google-login', async (req: Request, res: Response) => {
   const { token: googleToken } = req.body;
 
-  const ticket = await client.verifyIdToken({
-    idToken: googleToken,
-    audience: googleClientId,
-  });
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: googleToken,
+      audience: googleClientId,
+    });
 
-  const payload = ticket.getPayload();
+    const payload = ticket.getPayload();
 
-  if (!payload) {
-    return res.status(400).send('Invalid Google token');
+    if (!payload) {
+      return res.status(400).send('Invalid Google token');
+    }
+
+    let user = await User.findOne({ login: payload.email });
+
+    if (!user) {
+      user = new User({
+        login: payload.email || '',
+        password: '',
+        firstName: payload.given_name || '',
+        lastName: payload.family_name || '',
+        role: 'developer'
+      });
+      await user.save();
+    }
+
+    const jwtToken = generateToken({ id: user.id, role: user.role, firstName: user.firstName, lastName: user.lastName }, 60 * 15); // 15 minutes
+    const newRefreshToken = generateToken({ id: user.id, role: user.role, firstName: user.firstName, lastName: user.lastName }, 60 * 60 * 24); // 24 hours
+
+    res.status(200).send({ token: jwtToken, refreshToken: newRefreshToken, user });
+  } catch (err) {
+    const error = err as GenericError;
+    res.status(500).json({ message: 'Internal server error', error: error.message });
   }
-
-  let user = users.find(u => u.login === payload.email);
-
-  if (!user) {
-    user = {
-      id: users.length + 1,
-      login: payload.email || '',
-      password: '',
-      firstName: payload.given_name || '',
-      lastName: payload.family_name || '',
-      role: 'developer'
-    };
-    users.push(user);
-  }
-
-  const jwtToken = generateToken({ id: user.id.toString(), role: user.role, firstName: user.firstName, lastName: user.lastName }, 60 * 15); // 15 minutes
-  const newRefreshToken = generateToken({ id: user.id.toString(), role: user.role, firstName: user.firstName, lastName: user.lastName }, 60 * 60 * 24); // 24 hours
-
-  res.status(200).send({ token: jwtToken, refreshToken: newRefreshToken, user });
 });
 
-app.get('/users', (req: Request, res: Response) => {
-  res.status(200).json(users);
+app.get('/users', async (req: Request, res: Response) => {
+  try {
+    const users = await User.find();
+    res.status(200).json(users);
+  } catch (err) {
+    const error = err as GenericError;
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
 });
 
-app.get('/users/:id', (req: Request, res: Response) => {
-  const userId = parseInt(req.params.id, 10);
-  const user = users.find(u => u.id === userId);
-  if (!user) {
-    return res.status(404).send('User not found');
+app.get('/users/:id', async (req: Request, res: Response) => {
+  const userId = req.params.id;
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+    res.status(200).json(user);
+  } catch (err) {
+    const error = err as GenericError;
+    res.status(500).json({ message: 'Internal server error', error: error.message });
   }
-  res.status(200).json(user);
 });
 
 app.post('/refreshToken', verifyToken, (req: Request, res: Response) => {
@@ -140,7 +175,7 @@ function verifyToken(req: Request, res: Response, next: NextFunction) {
   jwt.verify(token, tokenSecret, (err, user) => {
     if (err) {
       console.log(err);
-      return res.status(401).send(err.message);
+      return res.status(401).json({ message: err.message });
     }
     req.user = user as JwtPayload & { id: string; role: string, firstName: string, lastName: string };
     next();
