@@ -11,7 +11,7 @@ export class StoryService {
 
     static getStoryById(id: string): Story | undefined {
         const stories = this.getStories();
-        return stories.find(story => story.id === id);
+        return stories.find(story => story._id === id);
     }
 
     static addStory(story: Story): void {
@@ -22,7 +22,7 @@ export class StoryService {
 
     static updateStory(updatedStory: Story): void {
         const stories = this.getStories();
-        const storyIndex = stories.findIndex(story => story.id === updatedStory.id);
+        const storyIndex = stories.findIndex(story => story._id === updatedStory._id);
         if (storyIndex > -1) {
             stories[storyIndex] = updatedStory;
             localStorage.setItem(this.localStorageKey, JSON.stringify(stories));
@@ -31,7 +31,7 @@ export class StoryService {
 
     static deleteStory(id: string): void {
         const stories = this.getStories();
-        const filteredStories = stories.filter(story => story.id !== id);
+        const filteredStories = stories.filter(story => story._id !== id);
         localStorage.setItem(this.localStorageKey, JSON.stringify(filteredStories));
     }
 
