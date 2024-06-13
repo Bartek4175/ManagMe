@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useState, ReactNode } from 'react';
 
 interface Project {
   id: string;
@@ -37,10 +37,4 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
   );
 };
 
-export const useProject = () => {
-  const context = useContext(ProjectContext);
-  if (context === undefined) {
-    throw new Error('useProject must be used within a ProjectProvider');
-  }
-  return context;
-};
+export { ProjectContext };

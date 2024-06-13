@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Form, Button, Container, Alert } from 'react-bootstrap';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 import GoogleLoginButton from './GoogleLoginButton';
+import { loginUser } from '../api/authApi';
 
 const LoginForm: React.FC = () => {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { login: loginUser } = useAuth();
+  const { login: loginUserContext } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,20 +22,8 @@ const LoginForm: React.FC = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ login, password })
-      });
-
-      if (!response.ok) {
-        throw new Error('Invalid login or password');
-      }
-
-      const data = await response.json();
-      loginUser(data.token, data.refreshToken, {
+      const data = await loginUser({ login, password });
+      loginUserContext(data.token, data.refreshToken, {
         id: data.user.id,
         login: data.user.login,
         firstName: data.user.firstName,

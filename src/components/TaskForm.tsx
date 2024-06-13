@@ -1,26 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { TaskService } from '../services/TaskService';
+import { addTask, getTaskById, updateTask } from '../api/taskApi';
 import { Task } from '../models/Task';
 import { CurrentProjectService } from '../services/CurrentProjectService';
-import { Form, Button, Container } from 'react-bootstrap';
+import { Form, Button, Container, Alert } from 'react-bootstrap';
 import { notificationService } from '../services/NotificationService';
-
-const generateId = (): string => {
-  return Math.random().toString(36).substr(2, 9);
-};
 
 const TaskForm: React.FC = () => {
   const { storyId, taskId } = useParams<{ storyId: string, taskId?: string }>();
   const currentProject = CurrentProjectService.getCurrentProject();
   const navigate = useNavigate();
   const [task, setTask] = useState<Task>({
-    id: '',
+    _id: '',
     name: '',
     description: '',
     priority: 'low',
     storyId: storyId || '',
-    projectId: currentProject ? currentProject.id : '',
+    projectId: currentProject ? currentProject._id : '',
     estimatedTime: 0,
     status: 'todo',
     createdAt: new Date().toISOString(),
@@ -36,38 +32,42 @@ const TaskForm: React.FC = () => {
       return;
     }
     if (taskId) {
-      const existingTask = TaskService.getTaskById(taskId);
-      if (existingTask) {
-        setTask(existingTask);
-      }
+      const fetchTask = async () => {
+        try {
+          const existingTask = await getTaskById(taskId);
+          setTask(existingTask);
+        } catch (err) {
+          setError('Task not found');
+        }
+      };
+      fetchTask();
     }
   }, [taskId, storyId, currentProject, navigate]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     try {
       if (taskId) {
-        TaskService.updateTask(task);
-        alert('Zadanie zaktualizowane pomyślnie!');
+        await updateTask(taskId, task);
+        alert('Task updated successfully!');
         notificationService.send({
-          title: 'Zadanie zaktualizowane pomyślnie!',
-          message: `Zadanie ${task.name} zaktualizowane pomyślnie w story ${storyId} i w projekcie ${currentProject?.name}`,
+          title: 'Task updated successfully!',
+          message: `Task ${task.name} updated successfully in story ${storyId} and project ${currentProject?.name}`,
           date: new Date().toISOString(),
           priority: 'medium',
           read: false
-      });
+        });
       } else {
-        const newTask = { ...task, id: generateId() };
-        TaskService.addTask(newTask);
-        alert('Zadanie dodane pomyślnie!');
+        await addTask(task);
+        alert('Task added successfully!');
         setTask({
-          id: '',
+          _id: '',
           name: '',
           description: '',
-          priority: 'high',
+          priority: 'low',
           storyId: storyId || '',
-          projectId: currentProject ? currentProject.id : '',
+          projectId: currentProject ? currentProject._id : '',
           estimatedTime: 0,
           status: 'todo',
           createdAt: new Date().toISOString(),
@@ -76,68 +76,68 @@ const TaskForm: React.FC = () => {
           userId: ''
         });
         notificationService.send({
-          title: 'Dodano nowe zadanie!',
-          message: `Dodano nowe zadanie w Story ${storyId} i w projekcie ${currentProject?.name}`,
+          title: 'New Task added!',
+          message: `New task added in Story ${storyId} and project ${currentProject?.name}`,
           date: new Date().toISOString(),
           priority: 'medium',
           read: false
-      });
+        });
       }
       navigate(`/tasks/${storyId}`);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Wystąpił nieznany błąd');
+        setError('An unknown error occurred');
       }
     }
   };
 
   return (
     <Container className="mt-4">
-      <h1>{taskId ? 'Edytuj Zadanie' : 'Dodaj Nowe Zadanie'}</h1>
+      <h1>{taskId ? 'Edit Task' : 'Add New Task'}</h1>
       <Form onSubmit={handleSubmit}>
-        {error && <p className="text-danger">{error}</p>}
+        {error && <Alert variant="danger">{error}</Alert>}
         <Form.Group className="mb-3" controlId="formTaskName">
-          <Form.Label>Nazwa zadania</Form.Label>
+          <Form.Label>Task Name</Form.Label>
           <Form.Control
             type="text"
             value={task.name}
             onChange={e => setTask({ ...task, name: e.target.value })}
-            placeholder="Nazwa zadania"
+            placeholder="Task name"
             required
           />
         </Form.Group>
         <Form.Group className="mb-3" controlId="formTaskDescription">
-          <Form.Label>Opis zadania</Form.Label>
+          <Form.Label>Task Description</Form.Label>
           <Form.Control
             as="textarea"
             rows={3}
             value={task.description}
             onChange={e => setTask({ ...task, description: e.target.value })}
-            placeholder="Opis zadania"
+            placeholder="Task description"
             required
           />
         </Form.Group>
         <Form.Group className="mb-3" controlId="formTaskPriority">
-          <Form.Label>Priorytet</Form.Label>
+          <Form.Label>Priority</Form.Label>
           <Form.Control
             as="select"
             value={task.priority}
             onChange={e => setTask({ ...task, priority: e.target.value as 'low' | 'medium' | 'high' })}
           >
-            <option value="low">Niski</option>
-            <option value="medium">Średni</option>
-            <option value="high">Wysoki</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
           </Form.Control>
         </Form.Group>
         <Form.Group className="mb-3" controlId="formTaskEstimatedTime">
-          <Form.Label>Szacowany czas wykonania</Form.Label>
+          <Form.Label>Estimated Time</Form.Label>
           <Form.Control
             type="number"
             value={task.estimatedTime}
             onChange={e => setTask({ ...task, estimatedTime: parseInt(e.target.value) })}
-            placeholder="Szacowany czas wykonania"
+            placeholder="Estimated time in hours"
             required
           />
         </Form.Group>
@@ -148,13 +148,13 @@ const TaskForm: React.FC = () => {
             value={task.status}
             onChange={e => setTask({ ...task, status: e.target.value as 'todo' | 'doing' | 'done' })}
           >
-            <option value="todo">Do zrobienia</option>
-            <option value="doing">W trakcie</option>
-            <option value="done">Zakończone</option>
+            <option value="todo">To do</option>
+            <option value="doing">Doing</option>
+            <option value="done">Done</option>
           </Form.Control>
         </Form.Group>
         <Button variant="primary" type="submit">
-          {taskId ? 'Zaktualizuj Zadanie' : 'Dodaj Zadanie'}
+          {taskId ? 'Update Task' : 'Add Task'}
         </Button>
       </Form>
     </Container>

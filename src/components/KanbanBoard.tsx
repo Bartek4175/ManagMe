@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { TaskService } from '../services/TaskService';
+import { getTasksByStory, deleteTask } from '../api/taskApi';
 import { Task } from '../models/Task';
 import { useParams } from 'react-router-dom';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
@@ -11,15 +11,18 @@ const KanbanBoard: React.FC = () => {
 
     useEffect(() => {
         if (storyId) {
-            const storyTasks = TaskService.getTasksByStory(storyId);
-            setTasks(storyTasks);
+            const fetchTasks = async () => {
+                const storyTasks = await getTasksByStory(storyId);
+                setTasks(storyTasks);
+            };
+            fetchTasks();
         }
     }, [storyId]);
 
-    const deleteTask = (id: string) => {
-        TaskService.deleteTask(id);
+    const handleDelete = async (id: string) => {
+        await deleteTask(id);
         if (storyId) {
-            setTasks(TaskService.getTasksByStory(storyId));
+            setTasks(tasks.filter(task => task._id !== id));
         }
     };
 
@@ -32,15 +35,15 @@ const KanbanBoard: React.FC = () => {
                         <Col key={status} className="kanban-column mb-4">
                             <h3 className="text-center">{status.toUpperCase()}</h3>
                             {tasks.filter(task => task.status === status).map(task => (
-                                <Card key={task.id} className="kanban-card mb-3">
+                                <Card key={task._id} className="kanban-card mb-3">
                                     <Card.Body>
                                         <Card.Title>{task.name}</Card.Title>
                                         <Card.Text>
                                             <strong>Opis:</strong> {task.description}<br />
                                             <strong>Priorytet:</strong> {task.priority}
                                         </Card.Text>
-                                        <NavLink to={`/task/${task.id}`} className="btn btn-primary me-2">Szczegóły</NavLink>
-                                        <Button variant="danger" onClick={() => deleteTask(task.id)}>Usuń</Button>
+                                        <NavLink to={`/task/${task._id}`} className="btn btn-primary me-2">Szczegóły</NavLink>
+                                        <Button variant="danger" onClick={() => handleDelete(task._id)}>Usuń</Button>
                                     </Card.Body>
                                 </Card>
                             ))}

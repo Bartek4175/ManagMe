@@ -12,8 +12,10 @@ import TaskDetails from './components/TaskDetails';
 import KanbanBoard from './components/KanbanBoard';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { CurrentProjectService } from './services/CurrentProjectService';
+import { useAuth } from './contexts/useAuth';
+import { AuthProvider } from './contexts/AuthContext';
+import { ProjectProvider } from './contexts/ProjectContext';
+import { useProject } from './contexts/useProject';
 import { Container } from 'react-bootstrap';
 import CustomNavbar from './components/CustomNavbar';
 import NotificationList from './components/NotificationList';
@@ -27,7 +29,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }
 };
 
 const ProjectProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
-  const currentProject = CurrentProjectService.getCurrentProject();
+  const { currentProject } = useProject();
   if (!currentProject) {
     return <Navigate to="/projects" />;
   }
@@ -50,29 +52,31 @@ const App: React.FC = () => {
   };
 
   return (
-    <AuthProvider>
-      <Router>
-        <CustomNavbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-        <Container>
-          <Routes>
-            <Route path="/login" element={<LoginForm />} />
-            <Route path="/register" element={<RegisterForm />} />
-            <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-            <Route path="/projects" element={<ProtectedRoute><ProjectList /></ProtectedRoute>} />
-            <Route path="/add-project" element={<ProtectedRoute><ProjectForm /></ProtectedRoute>} />
-            <Route path="/edit-project/:id" element={<ProtectedRoute><ProjectForm /></ProtectedRoute>} />
-            <Route path="/stories" element={<ProtectedRoute><ProjectProtectedRoute><StoryList /></ProjectProtectedRoute></ProtectedRoute>} />
-            <Route path="/add-story" element={<ProtectedRoute><ProjectProtectedRoute><StoryForm /></ProjectProtectedRoute></ProtectedRoute>} />
-            <Route path="/edit-story/:id" element={<ProtectedRoute><ProjectProtectedRoute><StoryForm /></ProjectProtectedRoute></ProtectedRoute>} />
-            <Route path="/tasks/:storyId" element={<ProtectedRoute><ProjectProtectedRoute><KanbanBoard /></ProjectProtectedRoute></ProtectedRoute>} />
-            <Route path="/add-task/:storyId" element={<ProtectedRoute><ProjectProtectedRoute><TaskForm /></ProjectProtectedRoute></ProtectedRoute>} />
-            <Route path="/edit-task/:storyId/:taskId" element={<ProtectedRoute><ProjectProtectedRoute><TaskForm /></ProjectProtectedRoute></ProtectedRoute>} />
-            <Route path="/task/:id" element={<ProtectedRoute><ProjectProtectedRoute><TaskDetails /></ProjectProtectedRoute></ProtectedRoute>} />
-            <Route path="/notifications" element={<NotificationList />} />
-          </Routes>
-        </Container>
-      </Router>
-    </AuthProvider>
+    <ProjectProvider>
+      <AuthProvider>
+        <Router>
+          <CustomNavbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+          <Container>
+            <Routes>
+              <Route path="/login" element={<LoginForm />} />
+              <Route path="/register" element={<RegisterForm />} />
+              <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+              <Route path="/projects" element={<ProtectedRoute><ProjectList /></ProtectedRoute>} />
+              <Route path="/add-project" element={<ProtectedRoute><ProjectForm /></ProtectedRoute>} />
+              <Route path="/edit-project/:id" element={<ProtectedRoute><ProjectForm /></ProtectedRoute>} />
+              <Route path="/stories" element={<ProtectedRoute><ProjectProtectedRoute><StoryList /></ProjectProtectedRoute></ProtectedRoute>} />
+              <Route path="/add-story" element={<ProtectedRoute><ProjectProtectedRoute><StoryForm /></ProjectProtectedRoute></ProtectedRoute>} />
+              <Route path="/edit-story/:id" element={<ProtectedRoute><ProjectProtectedRoute><StoryForm /></ProjectProtectedRoute></ProtectedRoute>} />
+              <Route path="/tasks/:storyId" element={<ProtectedRoute><ProjectProtectedRoute><KanbanBoard /></ProjectProtectedRoute></ProtectedRoute>} />
+              <Route path="/add-task/:storyId" element={<ProtectedRoute><ProjectProtectedRoute><TaskForm /></ProjectProtectedRoute></ProtectedRoute>} />
+              <Route path="/edit-task/:storyId/:taskId" element={<ProtectedRoute><ProjectProtectedRoute><TaskForm /></ProjectProtectedRoute></ProtectedRoute>} />
+              <Route path="/task/:id" element={<ProtectedRoute><ProjectProtectedRoute><TaskDetails /></ProjectProtectedRoute></ProtectedRoute>} />
+              <Route path="/notifications" element={<NotificationList />} />
+            </Routes>
+          </Container>
+        </Router>
+      </AuthProvider>
+    </ProjectProvider>
   );
 };
 

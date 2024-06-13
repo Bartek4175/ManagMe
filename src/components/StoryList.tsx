@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StoryService } from '../services/StoryService';
+import { getStoriesByProject, deleteStory } from '../api/storyApi';
 import { Story } from '../models/Story';
 import { Link, useNavigate } from 'react-router-dom';
 import { CurrentProjectService } from '../services/CurrentProjectService';
@@ -16,18 +16,24 @@ const StoryList: React.FC = () => {
             return;
         }
 
-        const fetchedStories = StoryService.getStoriesByProject(currentProject.id);
-        if (JSON.stringify(stories) !== JSON.stringify(fetchedStories)) {
-            setStories(fetchedStories);
-        }
+        const fetchStories = async () => {
+            try {
+                const fetchedStories = await getStoriesByProject(currentProject._id);
+                setStories(fetchedStories);
+            } catch (error) {
+                console.error('Error fetching stories:', error);
+            }
+        };
 
-    }, [currentProject, navigate, stories]);
+        fetchStories();
+    }, [currentProject, navigate]);
 
-    const deleteStory = (id: string) => {
-        StoryService.deleteStory(id);
-        if (currentProject) {
-            const updatedStories = StoryService.getStoriesByProject(currentProject.id);
-            setStories(updatedStories);
+    const handleDelete = async (id: string) => {
+        try {
+            await deleteStory(id);
+            setStories(stories.filter(story => story._id !== id));
+        } catch (error) {
+            console.error('Error deleting story:', error);
         }
     };
 
@@ -44,21 +50,21 @@ const StoryList: React.FC = () => {
                         <Col key={status} className="kanban-column mb-4">
                             <h3 className="text-center">{status.toUpperCase()}</h3>
                             {stories.filter(story => story.status === status).map(story => (
-                                <Card key={story.id} className="kanban-card mb-3">
+                                <Card key={story._id} className="kanban-card mb-3">
                                     <Card.Body>
-                                        <Card.Title>ID: {story.id}</Card.Title>
+                                        <Card.Title>ID: {story._id}</Card.Title>
                                         <Card.Subtitle className="mb-2 text-muted">Nazwa: {story.name}</Card.Subtitle>
                                         <Card.Text>Opis: {story.description}</Card.Text>
                                         <div className="story-actions d-flex flex-column">
-                                            <Button variant="danger" onClick={() => deleteStory(story.id)} className="mb-2">Usuń</Button>
+                                            <Button variant="danger" onClick={() => handleDelete(story._id)} className="mb-2">Usuń</Button>
                                             <Button variant="primary" className="mb-2">
-                                                <Link to={`/edit-story/${story.id}`} className="text-white text-decoration-none">Edytuj</Link>
+                                                <Link to={`/edit-story/${story._id}`} className="text-white text-decoration-none">Edytuj</Link>
                                             </Button>
                                             <Button variant="secondary" className="mb-2">
-                                                <Link to={`/add-task/${story.id}`} className="text-white text-decoration-none">Dodaj Zadanie</Link>
+                                                <Link to={`/add-task/${story._id}`} className="text-white text-decoration-none">Dodaj Zadanie</Link>
                                             </Button>
                                             <Button variant="info">
-                                                <Link to={`/tasks/${story.id}`} className="text-white text-decoration-none">Zobacz Zadania</Link>
+                                                <Link to={`/tasks/${story._id}`} className="text-white text-decoration-none">Zobacz Zadania</Link>
                                             </Button>
                                         </div>
                                     </Card.Body>

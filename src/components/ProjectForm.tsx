@@ -1,51 +1,55 @@
 import React, { useState, useEffect } from 'react';
-import { ProjectService } from '../services/ProjectService';
-import { Project } from '../models/Project';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Form, Button, Alert } from 'react-bootstrap';
+import { Project } from '../models/Project';
+import { addProject, getProjectById, updateProject } from '../api/projectApi';
 import { notificationService } from '../services/NotificationService';
-
-const generateId = (): string => {
-    return Math.random().toString(36).substr(2, 9);
-};
 
 const ProjectForm: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const [project, setProject] = useState<Project>({ id: '', name: '', description: '' });
+    const [project, setProject] = useState<Project>({ _id: '', name: '', description: '' });
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (id) {
-            const existingProject = ProjectService.getProjectById(id);
-            if (existingProject) {
-                setProject(existingProject);
-            }
+            const fetchProject = async () => {
+                try {
+                    const existingProject = await getProjectById(id);
+                    if (existingProject) {
+                        setProject(existingProject);
+                    } else {
+                        setError('Project not found');
+                    }
+                } catch (err) {
+                    setError('Project not found');
+                }
+            };
+            fetchProject();
         }
     }, [id]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(null); 
+        setError(null);
         try {
             if (id) {
-                ProjectService.updateProject(project);
-                alert('Projekt zaktualizowany pomyślnie!');
+                const updatedProject = await updateProject(id, project);
+                alert('Project updated successfully!');
                 notificationService.send({
-                    title: 'Projekt zaktualizowany',
-                    message: `Projekt ${project.name} został zaktualizowany`,
+                    title: 'Project Updated',
+                    message: `Project ${updatedProject.name} has been updated`,
                     date: new Date().toISOString(),
                     priority: 'medium',
                     read: false
                 });
             } else {
-                const newProject = { ...project, id: generateId() };
-                ProjectService.addProject(newProject);
-                alert('Projekt dodany pomyślnie!');
-                setProject({ id: '', name: '', description: '' });
+                const newProject = await addProject(project);
+                alert('Project added successfully!');
+                setProject({ _id: '', name: '', description: '' });
                 notificationService.send({
-                    title: 'Nowy projekt dodany',
-                    message: `Projekt ${newProject.name} został dodany`,
+                    title: 'New Project Added',
+                    message: `Project ${newProject.name} has been added`,
                     date: new Date().toISOString(),
                     priority: 'medium',
                     read: false
@@ -56,38 +60,38 @@ const ProjectForm: React.FC = () => {
             if (err instanceof Error) {
                 setError(err.message);
             } else {
-                setError('Wystąpił nieznany błąd');
+                setError('An unknown error occurred');
             }
         }
     };
 
     return (
         <Container className="mt-4">
-            <h2>{id ? 'Edytuj Projekt' : 'Dodaj Projekt'}</h2>
+            <h2>{id ? 'Edit Project' : 'Add Project'}</h2>
             {error && <Alert variant="danger">{error}</Alert>}
             <Form onSubmit={handleSubmit}>
                 <Form.Group controlId="projectName" className="mb-3">
-                    <Form.Label>Nazwa projektu</Form.Label>
+                    <Form.Label>Project Name</Form.Label>
                     <Form.Control
                         type="text"
                         value={project.name}
                         onChange={e => setProject({ ...project, name: e.target.value })}
-                        placeholder="Nazwa projektu"
+                        placeholder="Project Name"
                         required
                     />
                 </Form.Group>
                 <Form.Group controlId="projectDescription" className="mb-3">
-                    <Form.Label>Opis projektu</Form.Label>
+                    <Form.Label>Project Description</Form.Label>
                     <Form.Control
                         as="textarea"
                         value={project.description}
                         onChange={e => setProject({ ...project, description: e.target.value })}
-                        placeholder="Opis projektu"
+                        placeholder="Project Description"
                         required
                     />
                 </Form.Group>
                 <Button variant="primary" type="submit">
-                    {id ? 'Zaktualizuj Projekt' : 'Dodaj Projekt'}
+                    {id ? 'Update Project' : 'Add Project'}
                 </Button>
             </Form>
         </Container>

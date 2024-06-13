@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 import { Navbar, Nav, Container, Form, Badge } from 'react-bootstrap';
-import { BellFill } from 'react-bootstrap-icons'; // Importowanie ikony dzwonka
+import { BellFill } from 'react-bootstrap-icons';
 import { notificationService } from '../services/NotificationService';
 
 interface NavbarProps {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button, Alert, Container, Row, Col } from 'react-bootstrap';
+import { registerUser } from '../api/authApi';
 
 const RegisterForm: React.FC = () => {
   const [login, setLogin] = useState('');
@@ -15,18 +16,7 @@ const RegisterForm: React.FC = () => {
     e.preventDefault();
     setError(null);
     try {
-      const response = await fetch('http://localhost:3000/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ login, password, firstName, lastName, role })
-      });
-
-      if (!response.ok) {
-        throw new Error('Registration failed');
-      }
-
+      await registerUser({ login, password, firstName, lastName, role });
       navigate('/login');
     } catch (err) {
       setError((err as Error).message);

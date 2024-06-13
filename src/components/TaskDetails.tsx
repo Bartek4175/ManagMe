@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { TaskService } from '../services/TaskService';
+import { getTaskById, updateTask } from '../api/taskApi';
 import { Task } from '../models/Task';
 import { User } from '../models/User';
 import { useParams } from 'react-router-dom';
@@ -14,11 +14,14 @@ const TaskDetails: React.FC = () => {
 
     useEffect(() => {
         if (id) {
-            const existingTask = TaskService.getTaskById(id);
-            if (existingTask) {
-                setTask(existingTask);
-                setAssignee(existingTask.userId || '');
-            }
+            const fetchTask = async () => {
+                const existingTask = await getTaskById(id);
+                if (existingTask) {
+                    setTask(existingTask);
+                    setAssignee(existingTask.userId || '');
+                }
+            };
+            fetchTask();
         }
         fetch('http://localhost:3000/users')
             .then(response => response.json())
@@ -39,20 +42,20 @@ const TaskDetails: React.FC = () => {
         }
     }, [assignee]);
 
-    const handleAssigneeChange: React.ChangeEventHandler<HTMLSelectElement> = (e) => {
+    const handleAssigneeChange: React.ChangeEventHandler<HTMLSelectElement> = async (e) => {
         const userId = e.target.value;
         setAssignee(userId);
         if (task) {
             const updatedTask: Task = { ...task, userId, status: 'doing' as const, startDate: new Date().toISOString() };
-            TaskService.updateTask(updatedTask);
+            await updateTask(task._id, updatedTask);
             setTask(updatedTask);
         }
     };
 
-    const markAsDone = () => {
+    const markAsDone = async () => {
         if (task) {
             const updatedTask: Task = { ...task, status: 'done' as const, endDate: new Date().toISOString() };
-            TaskService.updateTask(updatedTask);
+            await updateTask(task._id, updatedTask);
             setTask(updatedTask);
         }
     };
@@ -113,7 +116,7 @@ const TaskDetails: React.FC = () => {
                             >
                                 <option value="">Wybierz osobę</option>
                                 {users.map(user => (
-                                    <option key={user.id} value={user.id}>{user.firstName} {user.lastName} ({user.role})</option>
+                                    <option key={user._id} value={user._id}>{user.firstName} {user.lastName} ({user.role})</option>
                                 ))}
                             </select>
                         </div>

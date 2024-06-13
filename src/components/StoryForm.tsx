@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { StoryService } from '../services/StoryService';
+import { useNavigate, useParams } from 'react-router-dom';
+import { addStory, getStoryById, updateStory } from '../api/storyApi';
 import { Story } from '../models/Story';
-import { useParams, useNavigate } from 'react-router-dom';
 import { CurrentProjectService } from '../services/CurrentProjectService';
-import { useAuth } from '../contexts/AuthContext';
-import { Form, Button, Container } from 'react-bootstrap';
+import { Form, Button, Container, Alert } from 'react-bootstrap';
 import { notificationService } from '../services/NotificationService';
-
-const generateId = (): string => {
-    return Math.random().toString(36).substr(2, 9);
-};
+import { useAuth } from '../contexts/useAuth';
 
 const StoryForm: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -17,11 +13,11 @@ const StoryForm: React.FC = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [story, setStory] = useState<Story>({
-        id: '',
+        _id: '',
         name: '',
         description: '',
         priority: 'low',
-        projectId: currentProject ? currentProject.id : '',
+        projectId: currentProject ? currentProject._id : '',
         createdAt: new Date().toISOString(),
         status: 'todo',
         ownerId: user ? user.id : ''
@@ -34,14 +30,19 @@ const StoryForm: React.FC = () => {
             return;
         }
         if (id) {
-            const existingStory = StoryService.getStoryById(id);
-            if (existingStory) {
-                setStory(existingStory);
-            }
+            const fetchStory = async () => {
+                try {
+                    const existingStory = await getStoryById(id);
+                    setStory(existingStory);
+                } catch (err) {
+                    setError('Story not found');
+                }
+            };
+            fetchStory();
         }
     }, [id, user, currentProject, navigate]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
         if (!user) {
@@ -50,7 +51,7 @@ const StoryForm: React.FC = () => {
         }
         try {
             if (id) {
-                StoryService.updateStory({ ...story, ownerId: user.id });
+                await updateStory(id, { ...story, ownerId: user.id });
                 alert('Story zaktualizowany pomyślnie!');
                 notificationService.send({
                     title: 'Story zaktualizowany pomyślnie',
@@ -60,15 +61,14 @@ const StoryForm: React.FC = () => {
                     read: false
                 });
             } else {
-                const newStory = { ...story, id: generateId(), ownerId: user.id };
-                StoryService.addStory(newStory);
+                await addStory({ ...story, ownerId: user.id });
                 alert('Story dodana pomyślnie!');
                 setStory({
-                    id: '',
+                    _id: '',
                     name: '',
                     description: '',
                     priority: 'low',
-                    projectId: currentProject ? currentProject.id : '',
+                    projectId: currentProject ? currentProject._id : '',
                     createdAt: new Date().toISOString(),
                     status: 'todo',
                     ownerId: user.id
@@ -81,6 +81,7 @@ const StoryForm: React.FC = () => {
                     read: false
                 });
             }
+            navigate('/stories');
         } catch (err: unknown) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -90,16 +91,12 @@ const StoryForm: React.FC = () => {
         }
     };
 
-    if (!currentProject) {
-        return <p>Nie wybrano projektu. Przekierowanie...</p>;
-    }
-
     return (
         <Container className="mt-4">
             <h2>{id ? 'Zaktualizuj Story' : 'Dodaj Story'}</h2>
+            {error && <Alert variant="danger">{error}</Alert>}
             <Form onSubmit={handleSubmit}>
-                {error && <p className="text-danger">{error}</p>}
-                <Form.Group className="mb-3">
+                <Form.Group className="mb-3" controlId="formStoryName">
                     <Form.Label>Nazwa Story</Form.Label>
                     <Form.Control
                         type="text"
@@ -109,17 +106,18 @@ const StoryForm: React.FC = () => {
                         required
                     />
                 </Form.Group>
-                <Form.Group className="mb-3">
+                <Form.Group className="mb-3" controlId="formStoryDescription">
                     <Form.Label>Opis Story</Form.Label>
                     <Form.Control
                         as="textarea"
+                        rows={3}
                         value={story.description}
                         onChange={e => setStory({ ...story, description: e.target.value })}
                         placeholder="Opis Story"
                         required
                     />
                 </Form.Group>
-                <Form.Group className="mb-3">
+                <Form.Group className="mb-3" controlId="formStoryPriority">
                     <Form.Label>Priorytet</Form.Label>
                     <Form.Control
                         as="select"
@@ -131,7 +129,7 @@ const StoryForm: React.FC = () => {
                         <option value="high">Wysoki</option>
                     </Form.Control>
                 </Form.Group>
-                <Form.Group className="mb-3">
+                <Form.Group className="mb-3" controlId="formStoryStatus">
                     <Form.Label>Status</Form.Label>
                     <Form.Control
                         as="select"
@@ -143,7 +141,7 @@ const StoryForm: React.FC = () => {
                         <option value="done">Zakończone</option>
                     </Form.Control>
                 </Form.Group>
-                <Button type="submit" variant="primary">
+                <Button variant="primary" type="submit">
                     {id ? 'Zaktualizuj Story' : 'Dodaj Story'}
                 </Button>
             </Form>

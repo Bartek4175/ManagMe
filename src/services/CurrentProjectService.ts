@@ -15,4 +15,8 @@ export class CurrentProjectService {
         const project = localStorage.getItem(this.localStorageKey);
         return project ? JSON.parse(project) : null;
     }
+
+    static clearCurrentProject(): void {
+        localStorage.removeItem(this.localStorageKey);
+    }
 }
