@@ -1,5 +1,6 @@
 import React, { createContext, useState, ReactNode } from 'react';
-import { useProject } from './useProject';
+import { CurrentProjectService } from '../services/CurrentProjectService';
+//import { getIdByLogin } from '../api/userApi';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -21,11 +22,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return id && login && firstName && lastName && role ? { id, login, firstName, lastName, role } : null;
   });
 
-  const { clearCurrentProject } = useProject();
 
   const login = (token: string, refreshToken: string, user: { id: string, login: string, firstName: string, lastName: string, role: string }) => {
     localStorage.setItem('token', token);
     localStorage.setItem('refreshToken', refreshToken);
+    //const dId = getIdByLogin(user.login);
+    //getIdByLogin(user.login)
+    //console.log(user)
     localStorage.setItem('id', user.id);
     localStorage.setItem('login', user.login);
     localStorage.setItem('firstName', user.firstName);
@@ -33,6 +36,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem('role', user.role);
     setIsAuthenticated(true);
     setUser(user);
+    //console.log(user)
   };
 
   const logout = () => {
@@ -43,7 +47,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem('firstName');
     localStorage.removeItem('lastName');
     localStorage.removeItem('role');
-    clearCurrentProject();
+    CurrentProjectService.clearCurrentProject();
     setIsAuthenticated(false);
     setUser(null);
   };

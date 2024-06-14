@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { addStory, getStoryById, updateStory } from '../api/storyApi';
 import { Story } from '../models/Story';
@@ -12,6 +12,7 @@ const StoryForm: React.FC = () => {
     const currentProject = CurrentProjectService.getCurrentProject();
     const { user } = useAuth();
     const navigate = useNavigate();
+    //console.log(user);
     const [story, setStory] = useState<Story>({
         _id: '',
         name: '',
@@ -24,23 +25,26 @@ const StoryForm: React.FC = () => {
     });
     const [error, setError] = useState<string | null>(null);
 
+    const fetchStory = useCallback(async () => {
+        if (id) {
+            try {
+                const existingStory = await getStoryById(id);
+                if (existingStory && existingStory._id !== story._id) {
+                    setStory(existingStory);
+                }
+            } catch (err) {
+                setError('Story not found');
+            }
+        }
+    }, [id, story._id]);
+
     useEffect(() => {
         if (!user || !currentProject) {
             navigate('/projects');
             return;
         }
-        if (id) {
-            const fetchStory = async () => {
-                try {
-                    const existingStory = await getStoryById(id);
-                    setStory(existingStory);
-                } catch (err) {
-                    setError('Story not found');
-                }
-            };
-            fetchStory();
-        }
-    }, [id, user, currentProject, navigate]);
+        fetchStory();
+    }, [user, currentProject, fetchStory, navigate]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -52,7 +56,6 @@ const StoryForm: React.FC = () => {
         try {
             if (id) {
                 await updateStory(id, { ...story, ownerId: user.id });
-                alert('Story zaktualizowany pomyślnie!');
                 notificationService.send({
                     title: 'Story zaktualizowany pomyślnie',
                     message: `Story o ID ${id} został zaktualizowany`,
@@ -62,7 +65,6 @@ const StoryForm: React.FC = () => {
                 });
             } else {
                 await addStory({ ...story, ownerId: user.id });
-                alert('Story dodana pomyślnie!');
                 setStory({
                     _id: '',
                     name: '',

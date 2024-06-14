@@ -17,7 +17,7 @@ const Home: React.FC = () => {
           {currentProject ? (
             <Card className="mb-4">
               <Card.Body>
-                <Card.Title>Aktualny Projekt:</Card.Title>
+                <Card.Title>Wybrany projekt:</Card.Title>
                 <Card.Text><strong>ID:</strong> {currentProject._id}</Card.Text>
                 <Card.Text><strong>Nazwa:</strong> {currentProject.name}</Card.Text>
                 <Card.Text><strong>Opis:</strong> {currentProject.description}</Card.Text>

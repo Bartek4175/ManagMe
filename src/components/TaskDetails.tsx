@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getTaskById, updateTask } from '../api/taskApi';
+import { getUsers, getUserById } from '../api/userApi';
 import { Task } from '../models/Task';
 import { User } from '../models/User';
 import { useParams } from 'react-router-dom';
@@ -23,22 +24,30 @@ const TaskDetails: React.FC = () => {
             };
             fetchTask();
         }
-        fetch('http://localhost:3000/users')
-            .then(response => response.json())
-            .then(data => {
-                setUsers(data.filter((user: User) => user.role === 'devops' || user.role === 'developer'));
-            })
-            .catch(error => console.error('Error fetching users:', error));
+        
+        const fetchUsers = async () => {
+            try {
+                const data = await getUsers();
+                setUsers(data.filter(user => user.role === 'devops' || user.role === 'developer'));
+            } catch (error) {
+                console.error('Error fetching users:', error);
+            }
+        };
+
+        fetchUsers();
     }, [id]);
 
     useEffect(() => {
         if (assignee) {
-            fetch(`http://localhost:3000/users/${assignee}`)
-                .then(response => response.json())
-                .then(data => {
+            const fetchAssignedUser = async () => {
+                try {
+                    const data = await getUserById(assignee);
                     setAssignedUser(data);
-                })
-                .catch(error => console.error('Error fetching assigned user:', error));
+                } catch (error) {
+                    console.error('Error fetching assigned user:', error);
+                }
+            };
+            fetchAssignedUser();
         }
     }, [assignee]);
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Form, Button, Container, Alert } from 'react-bootstrap';
 import { useAuth } from '../contexts/useAuth';
-import GoogleLoginButton from './GoogleLoginButton';
+import GoogleLoginButton from '../components/GoogleLoginButton';
 import { loginUser } from '../api/authApi';
 
 const LoginForm: React.FC = () => {
@@ -17,14 +17,14 @@ const LoginForm: React.FC = () => {
     setError(null);
 
     if (!password.trim()) {
-      setError('Password cannot be empty');
+      setError('Hasło nie może być puste!');
       return;
     }
 
     try {
       const data = await loginUser({ login, password });
       loginUserContext(data.token, data.refreshToken, {
-        id: data.user.id,
+        id: data.user._id,
         login: data.user.login,
         firstName: data.user.firstName,
         lastName: data.user.lastName,
@@ -52,7 +52,7 @@ const LoginForm: React.FC = () => {
           />
         </Form.Group>
         <Form.Group controlId="formPassword">
-          <Form.Label>Password</Form.Label>
+          <Form.Label>Hasło</Form.Label>
           <Form.Control
             type="password"
             value={password}
@@ -61,7 +61,7 @@ const LoginForm: React.FC = () => {
             required
           />
         </Form.Group>
-        <Button variant="primary" type="submit" className="mt-3">Login</Button>
+        <Button variant="primary" type="submit" className="mt-3">Zaloguj się</Button>
       </Form>
       <GoogleLoginButton />
       <p className="mt-3">Nie masz konta? <Link to="/register">Zarejestruj się</Link></p>

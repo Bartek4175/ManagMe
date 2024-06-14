@@ -8,6 +8,7 @@ export class CurrentProjectService {
             localStorage.removeItem(this.localStorageKey);
         } else {
             localStorage.setItem(this.localStorageKey, JSON.stringify(project));
+            window.dispatchEvent(new Event('currentProjectChanged'));
         }
     }
 
@@ -18,5 +19,6 @@ export class CurrentProjectService {
 
     static clearCurrentProject(): void {
         localStorage.removeItem(this.localStorageKey);
+        window.dispatchEvent(new Event('currentProjectChanged'));
     }
 }

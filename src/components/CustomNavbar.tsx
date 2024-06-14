@@ -31,17 +31,17 @@ const CustomNavbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link as={Link} to="/">Home</Nav.Link>
-            <Nav.Link as={Link} to="/projects">Projects</Nav.Link>
-            <Nav.Link as={Link} to="/add-project">Add Project</Nav.Link>
+            <Nav.Link as={Link} to="/">Strona główna</Nav.Link>
+            <Nav.Link as={Link} to="/projects">Projekty</Nav.Link>
+            <Nav.Link as={Link} to="/add-project">Nowy projekt</Nav.Link>
             <Nav.Link as={Link} to="/stories">Stories</Nav.Link>
-            <Nav.Link as={Link} to="/add-story">Add Story</Nav.Link>
+            <Nav.Link as={Link} to="/add-story">Nowe story</Nav.Link>
           </Nav>
           <div className="d-flex align-items-center">
             <Form.Check
               type="switch"
               id="dark-mode-switch"
-              label="Dark Mode"
+              label="Tryb ciemny"
               checked={darkMode}
               onChange={toggleDarkMode}
               className="me-3"
@@ -56,8 +56,8 @@ const CustomNavbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
                     </Badge>
                   }
                 </div>
-                <span className="me-2">Signed in as: {user?.login}</span>
-                <button className="btn btn-outline-danger" onClick={logout}>Logout</button>
+                <span className="me-2">Zalogowany jako: {user?.login}</span>
+                <button className="btn btn-outline-danger" onClick={logout}>Wyloguj się</button>
               </>
             )}
           </div>

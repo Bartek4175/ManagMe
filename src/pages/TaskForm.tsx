@@ -99,28 +99,28 @@ const TaskForm: React.FC = () => {
       <Form onSubmit={handleSubmit}>
         {error && <Alert variant="danger">{error}</Alert>}
         <Form.Group className="mb-3" controlId="formTaskName">
-          <Form.Label>Task Name</Form.Label>
+          <Form.Label>Nazwa zadania</Form.Label>
           <Form.Control
             type="text"
             value={task.name}
             onChange={e => setTask({ ...task, name: e.target.value })}
-            placeholder="Task name"
+            placeholder="Nazwa zadania"
             required
           />
         </Form.Group>
         <Form.Group className="mb-3" controlId="formTaskDescription">
-          <Form.Label>Task Description</Form.Label>
+          <Form.Label>Opis zadania</Form.Label>
           <Form.Control
             as="textarea"
             rows={3}
             value={task.description}
             onChange={e => setTask({ ...task, description: e.target.value })}
-            placeholder="Task description"
+            placeholder="Opis zadania"
             required
           />
         </Form.Group>
         <Form.Group className="mb-3" controlId="formTaskPriority">
-          <Form.Label>Priority</Form.Label>
+          <Form.Label>Priorytet</Form.Label>
           <Form.Control
             as="select"
             value={task.priority}
@@ -132,12 +132,12 @@ const TaskForm: React.FC = () => {
           </Form.Control>
         </Form.Group>
         <Form.Group className="mb-3" controlId="formTaskEstimatedTime">
-          <Form.Label>Estimated Time</Form.Label>
+          <Form.Label>Przewidywany czas (w godzinach)</Form.Label>
           <Form.Control
             type="number"
             value={task.estimatedTime}
             onChange={e => setTask({ ...task, estimatedTime: parseInt(e.target.value) })}
-            placeholder="Estimated time in hours"
+            placeholder="Przewidywany czas w godzinach"
             required
           />
         </Form.Group>
@@ -154,7 +154,7 @@ const TaskForm: React.FC = () => {
           </Form.Control>
         </Form.Group>
         <Button variant="primary" type="submit">
-          {taskId ? 'Update Task' : 'Add Task'}
+          {taskId ? 'Zaktualizuj zadanie' : 'Dodaj zadanie'}
         </Button>
       </Form>
     </Container>

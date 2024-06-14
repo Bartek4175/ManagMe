@@ -27,7 +27,7 @@ const RegisterForm: React.FC = () => {
     <Container>
       <Row className="justify-content-md-center">
         <Col md="6">
-          <h2 className="text-center">Register</h2>
+          <h2 className="text-center">Rejestracja</h2>
           {error && <Alert variant="danger">{error}</Alert>}
           <Form onSubmit={handleSubmit}>
             <Form.Group controlId="formLogin">
@@ -36,42 +36,42 @@ const RegisterForm: React.FC = () => {
                 type="text"
                 value={login}
                 onChange={e => setLogin(e.target.value)}
-                placeholder="Enter login"
+                placeholder="Wpisz login"
                 required
               />
             </Form.Group>
             <Form.Group controlId="formPassword" className="mt-3">
-              <Form.Label>Password</Form.Label>
+              <Form.Label>Hasło</Form.Label>
               <Form.Control
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="Enter password"
+                placeholder="Wpisz hasło"
                 required
               />
             </Form.Group>
             <Form.Group controlId="formFirstName" className="mt-3">
-              <Form.Label>First Name</Form.Label>
+              <Form.Label>Imię</Form.Label>
               <Form.Control
                 type="text"
                 value={firstName}
                 onChange={e => setFirstName(e.target.value)}
-                placeholder="Enter first name"
+                placeholder="Wpisz imię"
                 required
               />
             </Form.Group>
             <Form.Group controlId="formLastName" className="mt-3">
-              <Form.Label>Last Name</Form.Label>
+              <Form.Label>Nazwisko</Form.Label>
               <Form.Control
                 type="text"
                 value={lastName}
                 onChange={e => setLastName(e.target.value)}
-                placeholder="Enter last name"
+                placeholder="Wpisz nazwisko"
                 required
               />
             </Form.Group>
             <Form.Group controlId="formRole" className="mt-3">
-              <Form.Label>Role</Form.Label>
+              <Form.Label>Rola</Form.Label>
               <Form.Control
                 as="select"
                 value={role}

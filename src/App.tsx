@@ -2,23 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import Home from './components/Home';
-import ProjectForm from './components/ProjectForm';
+import Home from './pages/Home';
+import ProjectForm from './pages/ProjectForm';
 import ProjectList from './components/ProjectList';
 import StoryList from './components/StoryList';
-import StoryForm from './components/StoryForm';
-import TaskForm from './components/TaskForm';
+import StoryForm from './pages/StoryForm';
+import TaskForm from './pages/TaskForm';
 import TaskDetails from './components/TaskDetails';
-import KanbanBoard from './components/KanbanBoard';
-import LoginForm from './components/LoginForm';
-import RegisterForm from './components/RegisterForm';
+import KanbanBoard from './pages/KanbanBoard';
+import LoginForm from './pages/LoginForm';
+import RegisterForm from './pages/RegisterForm';
 import { useAuth } from './contexts/useAuth';
 import { AuthProvider } from './contexts/AuthContext';
-import { ProjectProvider } from './contexts/ProjectContext';
-import { useProject } from './contexts/useProject';
 import { Container } from 'react-bootstrap';
 import CustomNavbar from './components/CustomNavbar';
-import NotificationList from './components/NotificationList';
+import NotificationList from './pages/NotificationList';
 
 const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -28,13 +26,6 @@ const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }
   return children;
 };
 
-const ProjectProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
-  const { currentProject } = useProject();
-  if (!currentProject) {
-    return <Navigate to="/projects" />;
-  }
-  return children;
-};
 
 const App: React.FC = () => {
   const [darkMode, setDarkMode] = useState<boolean>(false);
@@ -52,7 +43,6 @@ const App: React.FC = () => {
   };
 
   return (
-    <ProjectProvider>
       <AuthProvider>
         <Router>
           <CustomNavbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
@@ -64,19 +54,18 @@ const App: React.FC = () => {
               <Route path="/projects" element={<ProtectedRoute><ProjectList /></ProtectedRoute>} />
               <Route path="/add-project" element={<ProtectedRoute><ProjectForm /></ProtectedRoute>} />
               <Route path="/edit-project/:id" element={<ProtectedRoute><ProjectForm /></ProtectedRoute>} />
-              <Route path="/stories" element={<ProtectedRoute><ProjectProtectedRoute><StoryList /></ProjectProtectedRoute></ProtectedRoute>} />
-              <Route path="/add-story" element={<ProtectedRoute><ProjectProtectedRoute><StoryForm /></ProjectProtectedRoute></ProtectedRoute>} />
-              <Route path="/edit-story/:id" element={<ProtectedRoute><ProjectProtectedRoute><StoryForm /></ProjectProtectedRoute></ProtectedRoute>} />
-              <Route path="/tasks/:storyId" element={<ProtectedRoute><ProjectProtectedRoute><KanbanBoard /></ProjectProtectedRoute></ProtectedRoute>} />
-              <Route path="/add-task/:storyId" element={<ProtectedRoute><ProjectProtectedRoute><TaskForm /></ProjectProtectedRoute></ProtectedRoute>} />
-              <Route path="/edit-task/:storyId/:taskId" element={<ProtectedRoute><ProjectProtectedRoute><TaskForm /></ProjectProtectedRoute></ProtectedRoute>} />
-              <Route path="/task/:id" element={<ProtectedRoute><ProjectProtectedRoute><TaskDetails /></ProjectProtectedRoute></ProtectedRoute>} />
+              <Route path="/stories" element={<ProtectedRoute><StoryList /></ProtectedRoute>} />
+              <Route path="/add-story" element={<ProtectedRoute><StoryForm /></ProtectedRoute>} />
+              <Route path="/edit-story/:id" element={<ProtectedRoute><StoryForm /></ProtectedRoute>} />
+              <Route path="/tasks/:storyId" element={<ProtectedRoute><KanbanBoard /></ProtectedRoute>} />
+              <Route path="/add-task/:storyId" element={<ProtectedRoute><TaskForm /></ProtectedRoute>} />
+              <Route path="/edit-task/:storyId/:taskId" element={<ProtectedRoute><TaskForm /></ProtectedRoute>} />
+              <Route path="/task/:id" element={<ProtectedRoute><TaskDetails /></ProtectedRoute>} />
               <Route path="/notifications" element={<NotificationList />} />
             </Routes>
           </Container>
         </Router>
       </AuthProvider>
-    </ProjectProvider>
   );
 };
 

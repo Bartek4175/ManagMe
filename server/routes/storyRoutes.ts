@@ -15,6 +15,7 @@ router.post('/', async (req, res) => {
     res.status(201).json(newStory);
   } catch (err) {
     const error = err as GenericError;
+    console.log(err)
     res.status(500).json({ message: 'Internal server error', error: error.message });
   }
 });

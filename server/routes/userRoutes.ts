@@ -31,4 +31,18 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+router.get('/login/:login', async (req, res) => {
+  const login = req.params.login;
+  try {
+    const user = await User.findOne({login: login});
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+    res.status(200).json(user);
+  } catch (err) {
+    const error = err as GenericError;
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+});
+
 export default router;

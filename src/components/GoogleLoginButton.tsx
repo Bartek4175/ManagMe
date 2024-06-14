@@ -21,7 +21,7 @@ const GoogleLoginButton: React.FC = () => {
     try {
       const data = await googleLogin(credential);
       login(data.token, data.refreshToken, {
-        id: data.user.id,
+        id: data.user._id,
         login: data.user.login,
         firstName: data.user.firstName,
         lastName: data.user.lastName,

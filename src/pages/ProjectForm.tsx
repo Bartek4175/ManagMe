@@ -35,21 +35,21 @@ const ProjectForm: React.FC = () => {
         try {
             if (id) {
                 const updatedProject = await updateProject(id, project);
-                alert('Project updated successfully!');
+                alert('Zaktualizowano projekt!');
                 notificationService.send({
-                    title: 'Project Updated',
-                    message: `Project ${updatedProject.name} has been updated`,
+                    title: 'Zaktualizowano projekt',
+                    message: `Projekt ${updatedProject.name} został zaktualizowany!`,
                     date: new Date().toISOString(),
                     priority: 'medium',
                     read: false
                 });
             } else {
                 const newProject = await addProject(project);
-                alert('Project added successfully!');
+                alert('Projekt dodany pomyślnie!');
                 setProject({ _id: '', name: '', description: '' });
                 notificationService.send({
-                    title: 'New Project Added',
-                    message: `Project ${newProject.name} has been added`,
+                    title: 'Projekt dodany pomyślnie!',
+                    message: `Projekt ${newProject.name} został dodany.`,
                     date: new Date().toISOString(),
                     priority: 'medium',
                     read: false
@@ -67,31 +67,31 @@ const ProjectForm: React.FC = () => {
 
     return (
         <Container className="mt-4">
-            <h2>{id ? 'Edit Project' : 'Add Project'}</h2>
+            <h2>{id ? 'Edytuj projekt' : 'Dodaj projekt'}</h2>
             {error && <Alert variant="danger">{error}</Alert>}
             <Form onSubmit={handleSubmit}>
                 <Form.Group controlId="projectName" className="mb-3">
-                    <Form.Label>Project Name</Form.Label>
+                    <Form.Label>Nazwa projektu</Form.Label>
                     <Form.Control
                         type="text"
                         value={project.name}
                         onChange={e => setProject({ ...project, name: e.target.value })}
-                        placeholder="Project Name"
+                        placeholder="Nazwa projektu"
                         required
                     />
                 </Form.Group>
                 <Form.Group controlId="projectDescription" className="mb-3">
-                    <Form.Label>Project Description</Form.Label>
+                    <Form.Label>Opis projektu</Form.Label>
                     <Form.Control
                         as="textarea"
                         value={project.description}
                         onChange={e => setProject({ ...project, description: e.target.value })}
-                        placeholder="Project Description"
+                        placeholder="Opis projektu"
                         required
                     />
                 </Form.Group>
                 <Button variant="primary" type="submit">
-                    {id ? 'Update Project' : 'Add Project'}
+                    {id ? 'Zaktualizuj projekt' : 'Dodaj projekt'}
                 </Button>
             </Form>
         </Container>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getStoriesByProject, deleteStory } from '../api/storyApi';
 import { Story } from '../models/Story';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { CurrentProjectService } from '../services/CurrentProjectService';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 
@@ -36,9 +36,18 @@ const StoryList: React.FC = () => {
             console.error('Error deleting story:', error);
         }
     };
+    const handleEdit = (id: string) => {
+        navigate(`/edit-story/${id}`);
+    };
+    const handleAddTask = (storyId: string) => {
+        navigate(`/add-task/${storyId}`);
+    };
 
+    const handleViewTasks = (storyId: string) => {
+        navigate(`/tasks/${storyId}`);
+    };
     if (!currentProject) {
-        return <p>Nie wybrano projektu. Przekierowanie...</p>;
+        return <p>Nie wybrano projektu.</p>;
     }
 
     return (
@@ -57,15 +66,9 @@ const StoryList: React.FC = () => {
                                         <Card.Text>Opis: {story.description}</Card.Text>
                                         <div className="story-actions d-flex flex-column">
                                             <Button variant="danger" onClick={() => handleDelete(story._id)} className="mb-2">Usuń</Button>
-                                            <Button variant="primary" className="mb-2">
-                                                <Link to={`/edit-story/${story._id}`} className="text-white text-decoration-none">Edytuj</Link>
-                                            </Button>
-                                            <Button variant="secondary" className="mb-2">
-                                                <Link to={`/add-task/${story._id}`} className="text-white text-decoration-none">Dodaj Zadanie</Link>
-                                            </Button>
-                                            <Button variant="info">
-                                                <Link to={`/tasks/${story._id}`} className="text-white text-decoration-none">Zobacz Zadania</Link>
-                                            </Button>
+                                            <Button variant="primary" className="mb-2" onClick={() => handleEdit(story._id)}>Edytuj</Button>
+                                            <Button variant="secondary" className="mb-2" onClick={() => handleAddTask(story._id)}>Dodaj Zadanie</Button>
+                                            <Button variant="info" onClick={() => handleViewTasks(story._id)}>Zobacz Zadania</Button>
                                         </div>
                                     </Card.Body>
                                 </Card>
